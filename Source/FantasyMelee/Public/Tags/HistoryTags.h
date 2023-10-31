@@ -1,0 +1,14 @@
+// Copyright AB. All Rights Reserved.
+
+#pragma once
+
+#include "NativeGameplayTags.h"
+
+// Tutorial
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_History_ReachedTutorialLookCheckpoint)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_History_ReachedTutorialJumpCheckpoint)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_History_ReachedTutorialSprintCheckpoint)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_History_ReachedTutorialWalkCheckpoint)
+
+// Astrid
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_History_MetAstrid)

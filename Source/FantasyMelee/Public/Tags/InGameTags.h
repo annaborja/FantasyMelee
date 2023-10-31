@@ -1,0 +1,18 @@
+// Copyright AB. All Rights Reserved.
+
+#pragma once
+
+#include "NativeGameplayTags.h"
+
+// GAS
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gas_AbilityFailure_Cooldown)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gas_AbilityFailure_Cost)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gas_AbilityFailure_IsDead)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gas_AbilityFailure_Networking)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gas_AbilityFailure_TagsBlocked)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Gas_AbilityFailure_TagsMissing)
+
+// In-Game
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_InGame_BlockInput)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_InGame_Never)
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_InGame_StartedGameProper)

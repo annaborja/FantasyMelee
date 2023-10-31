@@ -1,0 +1,17 @@
+// Copyright AB. All Rights Reserved.
+
+#pragma once
+
+#define BLACKBOARD_KEY_MOVE_TARGET "MoveTarget"
+
+#define MONTAGE_SECTION_HIT_REACTION_BACK_LARGE "BackLarge"
+#define MONTAGE_SECTION_HIT_REACTION_FRONT_LARGE "FrontLarge"
+#define MONTAGE_SECTION_HIT_REACTION_LEFT_LARGE "LeftLarge"
+#define MONTAGE_SECTION_HIT_REACTION_RIGHT_LARGE "RightLarge"
+
+#define MOTION_WARP_TARGET_ATTACK "AttackTarget"
+
+#define OBJECT_CHANNEL_PLAYER ECC_GameTraceChannel3
+
+#define TRACE_CHANNEL_INTERACTION ECC_GameTraceChannel2
+#define TRACE_CHANNEL_WEAPON ECC_GameTraceChannel1

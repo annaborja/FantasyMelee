@@ -1,0 +1,17 @@
+.idea/*
+Binaries/*
+Build/*
+DerivedDataCache/*
+Intermediate/*
+Saved/*
+
+# These file sizes are huge.
+# Just redownload them from the Epic Store.
+**/*/Manny/Materials/*
+**/*/Quinn/Materials/*
+
+*.sln
+*.xcworkspace
+
+.DS_Store
+
