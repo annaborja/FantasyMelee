@@ -19,7 +19,8 @@ enum EFmTriggerEffectType : uint8
 	DestroyActor,
 	GrantTag,
 	ProcessEntityTagSpec,
-	SetMoveTarget
+	SetLookTarget,
+	SetMoveTarget,
 };
 
 USTRUCT()
@@ -107,5 +108,5 @@ private:
 	static bool HandleGrantTag(const FFmTriggerEffect& TriggerEffect, AActor* OtherActor);
 	
 	bool HandleProcessEntityTagSpec(const FFmTriggerEffect& TriggerEffect, const AActor* OtherActor) const;
-	bool HandleSetMoveTarget(const FFmTriggerEffect& TriggerEffect, const AActor* OtherActor) const;
+	bool HandleSetBlackboardKey(const FFmTriggerEffect& TriggerEffect, const AActor* OtherActor) const;
 };

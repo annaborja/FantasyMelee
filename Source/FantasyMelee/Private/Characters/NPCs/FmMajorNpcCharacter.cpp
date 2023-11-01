@@ -116,15 +116,26 @@ FText AFmMajorNpcCharacter::GetInGameName() const
 	return MajorNpcData.Name;
 }
 
-// TODO(P0): Figure out how actors can be affected if tags are only added to the game mode map.
+void AFmMajorNpcCharacter::ToggleSprint(const bool bSprint) const
+{
+	if (const auto CharacterMovement = GetCharacterMovement())
+	{
+		if (bSprint)
+		{
+			CharacterMovement->MaxWalkSpeed += 200.f;
+		} else
+		{
+			CharacterMovement->MaxWalkSpeed -= 200.f;
+		}
+	}
+}
+
+// TODO(P0): Figure out how actors can be affected by secondary effects if tags are only added to the game mode map.
 void AFmMajorNpcCharacter::GrantTagSpec(const FFmTagSpec& TagSpec)
 {
 	if (const auto GameMode = Cast<AFantasyMeleeGameModeBase>(UGameplayStatics::GetGameMode(this)))
 	{
-		if (GrantTagSpec(GameMode, TagId, TagSpec, bDebugGrantTagSpec))
-		{
-			OnTagSpecGrant(TagSpec);
-		}
+		GrantTagSpec(GameMode, TagId, TagSpec, bDebugGrantTagSpec);
 	}
 }
 
@@ -136,18 +147,4 @@ void AFmMajorNpcCharacter::AdvanceDialogueStep(const FFmDialogueStepData& Dialog
 void AFmMajorNpcCharacter::SelectDialogueOption(const FFmDialogueOptionData& DialogueOptionData, AFmPlayerController* PlayerController, const AFmHud* Hud) const
 {
 	DialogueComponent->SelectDialogueOption(DialogueOptionData, PlayerController, Hud);
-}
-
-void AFmMajorNpcCharacter::OnTagSpecGrant(const FFmTagSpec& TagSpec) const
-{
-	if (TagSpec.Tag.MatchesTagExact(TAG_State_FasterWalk))
-	{
-		if (TagSpec.Count > 0)
-		{
-			GetCharacterMovement()->MaxWalkSpeed += 200.f;
-		} else if (TagSpec.Count < 0)
-		{
-			GetCharacterMovement()->MaxWalkSpeed -= 200.f;
-		}
-	}
 }

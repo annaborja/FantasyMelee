@@ -52,6 +52,9 @@ public:
 	virtual FText GetInGameName() const override;
 
 	UFUNCTION(BlueprintCallable)
+	void ToggleSprint(const bool bSprint) const;
+
+	UFUNCTION(BlueprintCallable)
 	virtual void GrantTagSpec(const FFmTagSpec& TagSpec) override;
 
 	void AdvanceDialogueStep(const FFmDialogueStepData& DialogueStepData, AFmPlayerController* PlayerController, const AFmHud* Hud) const;
@@ -74,6 +77,4 @@ private:
 	FGameplayTag TagId;
 
 	FFmMajorNpcData MajorNpcData;
-
-	void OnTagSpecGrant(const FFmTagSpec& TagSpec) const;
 };

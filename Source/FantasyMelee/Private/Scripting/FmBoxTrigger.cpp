@@ -49,8 +49,9 @@ void AFmBoxTrigger::OnBoxBeginOverlap_Implementation(UPrimitiveComponent* Overla
 		case ProcessEntityTagSpec:
 			TriggerEffect.bExecuted = HandleProcessEntityTagSpec(TriggerEffect, OtherActor);
 			break;
+		case SetLookTarget:
 		case SetMoveTarget:
-			TriggerEffect.bExecuted = HandleSetMoveTarget(TriggerEffect, OtherActor);
+			TriggerEffect.bExecuted = HandleSetBlackboardKey(TriggerEffect, OtherActor);
 			break;
 		default:
 			break;
@@ -99,7 +100,7 @@ bool AFmBoxTrigger::HandleProcessEntityTagSpec(const FFmTriggerEffect& TriggerEf
 	return true;
 }
 
-bool AFmBoxTrigger::HandleSetMoveTarget(const FFmTriggerEffect& TriggerEffect, const AActor* OtherActor) const
+bool AFmBoxTrigger::HandleSetBlackboardKey(const FFmTriggerEffect& TriggerEffect, const AActor* OtherActor) const
 {
 	if (!PassesClassFilter(TriggerEffect, OtherActor)) return false;
 	
@@ -162,7 +163,23 @@ bool AFmBoxTrigger::HandleSetMoveTarget(const FFmTriggerEffect& TriggerEffect, c
 		{
 			if (const auto BlackboardComponent = AiController->GetBlackboardComponent())
 			{
-				BlackboardComponent->SetValueAsObject(FName(BLACKBOARD_KEY_MOVE_TARGET), NewMoveTarget);
+				FName SelectorName;
+
+				switch (TriggerEffect.Type)
+				{
+				case SetLookTarget:
+					SelectorName = FName(BLACKBOARD_KEY_LOOK_TARGET);
+					break;
+				case SetMoveTarget:
+					SelectorName = FName(BLACKBOARD_KEY_MOVE_TARGET);
+					break;
+				default:
+					break;
+				}
+
+				if (SelectorName.IsNone()) return false;
+				
+				BlackboardComponent->SetValueAsObject(SelectorName, NewMoveTarget);
 			}
 		}
 	}

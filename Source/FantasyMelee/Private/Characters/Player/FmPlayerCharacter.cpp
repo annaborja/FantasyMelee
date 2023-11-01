@@ -133,6 +133,8 @@ void AFmPlayerCharacter::GrantTagSpec(const FFmTagSpec& TagSpec)
 			} else if (UFmPlayerQuestComponent::IsQuestTag(TagSpec.Tag))
 			{
 				bSuccess = QuestComponent->GrantQuest(TagSpec.Tag, this);
+			} else if (UFmPlayerTutorialComponent::IsTutorialTag(TagSpec.Tag)) {
+				bSuccess = TutorialComponent->GrantTutorial(TagSpec.Tag, this);
 			} else if (!CharacterTags.HasTagExact(TagSpec.Tag))
 			{
 				CharacterTags.AddTag(TagSpec.Tag);
@@ -156,7 +158,6 @@ void AFmPlayerCharacter::GrantTagSpec(const FFmTagSpec& TagSpec)
 			if (CustomPlayerController) CustomPlayerController->OnTagSpecGrant(TagSpec);
 			
 			if (QuestComponent) QuestComponent->OnTagSpecGrant(this);
-			if (TutorialComponent) TutorialComponent->OnTagSpecGrant(this);	
 		}
 	}
 }

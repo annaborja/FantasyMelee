@@ -3,8 +3,13 @@
 #include "Characters/Player/Components/FmPlayerTutorialComponent.h"
 
 #include "Characters/Player/FmPlayerCharacter.h"
+#include "Tags/TutorialTags.h"
 #include "UI/FmHud.h"
-#include "Utils/FmBlueprintFunctionLibrary.h"
+
+bool UFmPlayerTutorialComponent::IsTutorialTag(const FGameplayTag& Tag)
+{
+	return Tag.MatchesTag(TAG_Tutorial);
+}
 
 UFmPlayerTutorialComponent::UFmPlayerTutorialComponent()
 {
@@ -19,37 +24,42 @@ void UFmPlayerTutorialComponent::BeginPlay()
 		
 	TArray<FFmTutorialData*> AllTutorialRows;
 	TutorialDataTable->GetAllRows<FFmTutorialData>(TEXT("TutorialDataTable GetAllRows"), AllTutorialRows);
-
-	IncompleteTutorials.Reset();
-
-	for (const auto TutorialRow : AllTutorialRows.FilterByPredicate([this](const FFmTutorialData* Data)
-	{
-		return !CompletedTutorialTags.HasTagExact(Data->TagId);
-	}))
-	{
-		IncompleteTutorials.Add(*TutorialRow);
-	}
 }
 
-/**
- * Checks if any tutorials should be granted based on the player's owned tags.
- */
-void UFmPlayerTutorialComponent::OnTagSpecGrant(const AFmPlayerCharacter* Player)
+bool UFmPlayerTutorialComponent::GrantTutorial(const FGameplayTag& TutorialTag, const AFmPlayerCharacter* Player) const
 {
-	if (IncompleteTutorials.Num() <= 0) return;
-	
-	if (const auto Hud = Player->GetCustomHud())
+	if (const auto Tutorial = GetTutorialByTag(TutorialTag))
 	{
-		if (const auto TutorialIdx = IncompleteTutorials.IndexOfByPredicate([this](const FFmTutorialData& Data)
+		if (const auto Hud = Player->GetCustomHud())
 		{
-			return UFmBlueprintFunctionLibrary::IsEntityTagSpecSatisfied(this, Data.TagRequirements);
-		}); IncompleteTutorials.IsValidIndex(TutorialIdx))
-		{
-			const auto Tutorial = IncompleteTutorials[TutorialIdx];
-			
-			IncompleteTutorials.RemoveAt(TutorialIdx);
-			CompletedTutorialTags.AddTag(Tutorial.TagId);
-			Hud->BroadcastTutorial(Tutorial);
+			Hud->BroadcastTutorial(*Tutorial);
 		}
+
+		return true;
 	}
+
+	return false;
+}
+
+const FFmTutorialData* UFmPlayerTutorialComponent::GetTutorialByTag(const FGameplayTag& Tag) const
+{
+	TArray<FFmTutorialData*> AllTutorialRows;
+	TutorialDataTable->GetAllRows<FFmTutorialData>(TEXT("TutorialDataTable GetAllRows"), AllTutorialRows);
+	
+	TArray<FFmTutorialData> AllTutorials;
+
+	for (const auto TutorialRow : AllTutorialRows)
+	{
+		AllTutorials.Add(*TutorialRow);
+	}
+	
+	if (const auto Tutorial = AllTutorials.FindByPredicate([&Tag](const FFmTutorialData& Data)
+	{
+		return Tag.MatchesTagExact(Data.TagId);
+	}))
+	{
+		return Tutorial;
+	}
+
+	return nullptr;
 }

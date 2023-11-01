@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
-#include "Utils/Structs.h"
 #include "FmPlayerTutorialComponent.generated.h"
 
 class AFmPlayerCharacter;
@@ -21,9 +20,6 @@ struct FFmTutorialData : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FText Instructions;
-	
-	UPROPERTY(EditDefaultsOnly)
-	FFmEntityTagSpec TagRequirements;
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -32,20 +28,17 @@ class FANTASYMELEE_API UFmPlayerTutorialComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	static bool IsTutorialTag(const FGameplayTag& Tag);
+	
 	UFmPlayerTutorialComponent();
 
 	virtual void BeginPlay() override;
 
-	void OnTagSpecGrant(const AFmPlayerCharacter* Player);
+	bool GrantTutorial(const FGameplayTag& TutorialTag, const AFmPlayerCharacter* Player) const;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="FM Data", meta=(RowType="/Script/FantasyMelee.FmTutorialData"))
 	TObjectPtr<UDataTable> TutorialDataTable;
-
-	// TODO(P0): Load from saved data.
-	UPROPERTY(SaveGame, EditAnywhere, Category="FM Runtime")
-	FGameplayTagContainer CompletedTutorialTags;
 	
-	UPROPERTY(Transient, VisibleInstanceOnly, Category="FM Runtime")
-	TArray<FFmTutorialData> IncompleteTutorials;
+	const FFmTutorialData* GetTutorialByTag(const FGameplayTag& Tag) const;
 };

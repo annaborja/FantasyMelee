@@ -2,6 +2,7 @@
 
 #pragma once
 
+#define BLACKBOARD_KEY_LOOK_TARGET "LookTarget"
 #define BLACKBOARD_KEY_MOVE_TARGET "MoveTarget"
 
 #define MONTAGE_SECTION_HIT_REACTION_BACK_LARGE "BackLarge"
