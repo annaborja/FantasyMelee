@@ -36,7 +36,7 @@ class FANTASYMELEE_API AFmMajorNpcCharacter : public AFmNpcCharacter, public IGa
 	GENERATED_BODY()
 
 public:
-	static void GrantTagSpec(AFantasyMeleeGameModeBase* GameMode, const FGameplayTag& NpcTagId, const FFmTagSpec& TagSpec, const bool bDebug = false);
+	static bool GrantTagSpec(AFantasyMeleeGameModeBase* GameMode, const FGameplayTag& NpcTagId, const FFmTagSpec& TagSpec, const bool bDebug = false);
 	
 	AFmMajorNpcCharacter();
 	
@@ -66,7 +66,7 @@ private:
 	TObjectPtr<USphereComponent> InteractionSphere;
 	UPROPERTY(VisibleAnywhere, Category="Interaction")
 	float InteractionSphereRadius = 100.f;
-
+	
 	UPROPERTY(EditAnywhere, Category="FM Debug")
 	bool bDebugGrantTagSpec = false;
 	
@@ -74,4 +74,6 @@ private:
 	FGameplayTag TagId;
 
 	FFmMajorNpcData MajorNpcData;
+
+	void OnTagSpecGrant(const FFmTagSpec& TagSpec) const;
 };

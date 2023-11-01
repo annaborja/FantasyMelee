@@ -40,3 +40,5 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Item_Weapon_Sword, "Item.Weapon.Sword")
 UE_DEFINE_GAMEPLAY_TAG(TAG_Npc_Balthazar, "Npc.Balthazar")
 UE_DEFINE_GAMEPLAY_TAG(TAG_Npc_Carver, "Npc.Carver")
 UE_DEFINE_GAMEPLAY_TAG(TAG_Npc_Darrow, "Npc.Darrow")
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_State_FasterWalk, "State.FasterWalk")

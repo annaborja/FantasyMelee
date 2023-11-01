@@ -7,11 +7,13 @@
 #include "Components/FmInventoryComponent.h"
 #include "Components/SphereComponent.h"
 #include "FantasyMelee/FantasyMeleeGameModeBase.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Tags/TempTags.h"
 #include "Utils/Constants.h"
 #include "Utils/FmBlueprintFunctionLibrary.h"
 
-void AFmMajorNpcCharacter::GrantTagSpec(AFantasyMeleeGameModeBase* GameMode, const FGameplayTag& NpcTagId, const FFmTagSpec& TagSpec, const bool bDebug)
+bool AFmMajorNpcCharacter::GrantTagSpec(AFantasyMeleeGameModeBase* GameMode, const FGameplayTag& NpcTagId, const FFmTagSpec& TagSpec, const bool bDebug)
 {
 	if (bDebug)
 	{
@@ -43,9 +45,11 @@ void AFmMajorNpcCharacter::GrantTagSpec(AFantasyMeleeGameModeBase* GameMode, con
 				bSuccess = true;
 			}
 		}
-		
-		if (bSuccess) { }
+
+		return bSuccess;
 	}
+
+	return false;
 }
 
 AFmMajorNpcCharacter::AFmMajorNpcCharacter()
@@ -112,11 +116,15 @@ FText AFmMajorNpcCharacter::GetInGameName() const
 	return MajorNpcData.Name;
 }
 
+// TODO(P0): Figure out how actors can be affected if tags are only added to the game mode map.
 void AFmMajorNpcCharacter::GrantTagSpec(const FFmTagSpec& TagSpec)
 {
 	if (const auto GameMode = Cast<AFantasyMeleeGameModeBase>(UGameplayStatics::GetGameMode(this)))
 	{
-		GrantTagSpec(GameMode, TagId, TagSpec, bDebugGrantTagSpec);
+		if (GrantTagSpec(GameMode, TagId, TagSpec, bDebugGrantTagSpec))
+		{
+			OnTagSpecGrant(TagSpec);
+		}
 	}
 }
 
@@ -128,4 +136,18 @@ void AFmMajorNpcCharacter::AdvanceDialogueStep(const FFmDialogueStepData& Dialog
 void AFmMajorNpcCharacter::SelectDialogueOption(const FFmDialogueOptionData& DialogueOptionData, AFmPlayerController* PlayerController, const AFmHud* Hud) const
 {
 	DialogueComponent->SelectDialogueOption(DialogueOptionData, PlayerController, Hud);
+}
+
+void AFmMajorNpcCharacter::OnTagSpecGrant(const FFmTagSpec& TagSpec) const
+{
+	if (TagSpec.Tag.MatchesTagExact(TAG_State_FasterWalk))
+	{
+		if (TagSpec.Count > 0)
+		{
+			GetCharacterMovement()->MaxWalkSpeed += 200.f;
+		} else if (TagSpec.Count < 0)
+		{
+			GetCharacterMovement()->MaxWalkSpeed -= 200.f;
+		}
+	}
 }

@@ -35,6 +35,9 @@ struct FFmTriggerEffectTarget
 	
 	UPROPERTY(EditAnywhere)
 	FGameplayTag TagId;
+	
+	UPROPERTY(EditAnywhere)
+	float OverlapSphereRadius = 5000.f;
 };
 
 USTRUCT()
@@ -59,9 +62,6 @@ struct FFmTriggerEffect
 	
 	UPROPERTY(EditAnywhere)
 	FFmEntityTagSpec EntityTagSpec;
-	
-	UPROPERTY(EditAnywhere)
-	float OverlapSphereRadius = 5000.f;
 	
 	UPROPERTY(EditAnywhere)
 	FFmTriggerEffectTarget TargetA;

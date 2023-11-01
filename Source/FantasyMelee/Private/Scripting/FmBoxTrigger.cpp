@@ -109,7 +109,7 @@ bool AFmBoxTrigger::HandleSetMoveTarget(const FFmTriggerEffect& TriggerEffect, c
 	AActor* NewMoveTarget = nullptr;
 	
 	TArray<AActor*> OverlapActorsA;
-	UKismetSystemLibrary::SphereOverlapActors(this, GetActorLocation(), TriggerEffect.OverlapSphereRadius,
+	UKismetSystemLibrary::SphereOverlapActors(this, GetActorLocation(), TriggerEffect.TargetA.OverlapSphereRadius,
 		TriggerEffect.TargetA.ObjectTypes, TriggerEffect.TargetA.TargetClass, TArray<AActor*>(), OverlapActorsA);
 		
 	for (const auto ActorA : OverlapActorsA)
@@ -134,7 +134,7 @@ bool AFmBoxTrigger::HandleSetMoveTarget(const FFmTriggerEffect& TriggerEffect, c
 	if (TriggerEffect.TargetB.TargetClass)
 	{
 		TArray<AActor*> OverlapActorsB;
-		UKismetSystemLibrary::SphereOverlapActors(this, GetActorLocation(), TriggerEffect.OverlapSphereRadius,
+		UKismetSystemLibrary::SphereOverlapActors(this, GetActorLocation(), TriggerEffect.TargetB.OverlapSphereRadius,
 			TriggerEffect.TargetB.ObjectTypes, TriggerEffect.TargetB.TargetClass, TArray<AActor*>(), OverlapActorsB);
 	
 		for (const auto ActorB : OverlapActorsB)
