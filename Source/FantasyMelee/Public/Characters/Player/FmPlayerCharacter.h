@@ -29,6 +29,7 @@ public:
 
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void Jump() override;
+	virtual void StopJumping() override;
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
@@ -36,7 +37,8 @@ public:
 
 	virtual void GrantTagSpec(const FFmTagSpec& TagSpec) override;
 
-	void EnableJump();
+	void AllowJump();
+	bool AllowedToJump() const;
 	AFmHud* GetCustomHud() const;
 	
 	FORCEINLINE AFmPlayerController* GetCustomController() const { return CustomPlayerController; }
@@ -67,7 +69,7 @@ private:
 	UPROPERTY(SaveGame, EditAnywhere, Category="FM Runtime")
 	FGameplayTagContainer CharacterTags;
 	UPROPERTY(VisibleInstanceOnly, Category="FM Runtime")
-	bool bCanJump = true;
+	bool bAllowedToJump = true;
 
 	UPROPERTY(Transient)
 	TObjectPtr<AFmPlayerController> CustomPlayerController;

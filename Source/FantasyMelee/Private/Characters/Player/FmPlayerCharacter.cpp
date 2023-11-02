@@ -79,16 +79,27 @@ void AFmPlayerCharacter::PossessedBy(AController* NewController)
 
 void AFmPlayerCharacter::Jump()
 {
-	if (!bCanJump) return;
+	if (!bAllowedToJump) return;
 
+	bAllowedToJump = false;
+	
 	if (PlayerMovementComponent)
 	{
 		PlayerMovementComponent->bNotifyApex = true;
+		PlayerMovementComponent->ToggleCustomPressedJump(true);
 	}
 	
-	bCanJump = false;
-	
 	Super::Jump();
+
+	// Override the default jump logic with our custom logic.
+	bPressedJump = false;
+}
+
+void AFmPlayerCharacter::StopJumping()
+{
+	if (PlayerMovementComponent) PlayerMovementComponent->ToggleCustomPressedJump(false);
+	
+	Super::StopJumping();
 }
 
 UAbilitySystemComponent* AFmPlayerCharacter::GetAbilitySystemComponent() const
@@ -162,9 +173,14 @@ void AFmPlayerCharacter::GrantTagSpec(const FFmTagSpec& TagSpec)
 	}
 }
 
-void AFmPlayerCharacter::EnableJump()
+void AFmPlayerCharacter::AllowJump()
 {
-	bCanJump = true;
+	bAllowedToJump = true;
+}
+
+bool AFmPlayerCharacter::AllowedToJump() const
+{
+	return bAllowedToJump;
 }
 
 AFmHud* AFmPlayerCharacter::GetCustomHud() const

@@ -15,7 +15,7 @@ EBTNodeResult::Type UFmBtTask_FindTarget::ExecuteTask(UBehaviorTreeComponent& Ow
 			if (const auto BlackboardComponent = OwnerComp.GetBlackboardComponent())
 			{
 				const auto SpherePosition = AiPawn->GetActorLocation();
-		
+
 				TArray<AActor*> OverlapActors;
 				UKismetSystemLibrary::SphereOverlapActors(AiPawn, SpherePosition, OverlapSphereRadius,
 					ObjectTypes, TargetClass, TArray<AActor*> { AiPawn }, OverlapActors);

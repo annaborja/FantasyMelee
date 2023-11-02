@@ -14,7 +14,6 @@ void UFmPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		if (const auto MovementComponent = Character->GetCharacterMovement())
 		{
-			bIsSliding = MovementComponent->MovementMode == MOVE_Custom && MovementComponent->CustomMovementMode == EFmCustomMovementMode::Slide;
 		}
 	}
 }

@@ -14,5 +14,6 @@
 
 #define OBJECT_CHANNEL_PLAYER ECC_GameTraceChannel3
 
+#define TRACE_CHANNEL_CLIMBABLE ECC_GameTraceChannel4
 #define TRACE_CHANNEL_INTERACTION ECC_GameTraceChannel2
 #define TRACE_CHANNEL_WEAPON ECC_GameTraceChannel1
