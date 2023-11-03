@@ -58,7 +58,7 @@ struct FFmTriggerEffect
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<AActor>> ActorClassFilter { AFmPlayerCharacter::StaticClass() };
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, meta=(TitleProperty="Tag"))
 	TArray<FFmTagSpec> TagSpecs;
 	
 	UPROPERTY(EditAnywhere)
@@ -99,7 +99,7 @@ private:
 	UPROPERTY(EditAnywhere, Category="FM Params")
 	FGameplayTag TagId;
 	
-	UPROPERTY(EditAnywhere, Category="FM Params")
+	UPROPERTY(EditAnywhere, Category="FM Params", meta=(TitleProperty="Type"))
 	TArray<FFmTriggerEffect> TriggerEffects;
 
 	static bool PassesClassFilter(const FFmTriggerEffect& TriggerEffect, const AActor* OtherActor);

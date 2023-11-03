@@ -65,9 +65,55 @@ void UFmPlayerMovementComponent::UpdateCharacterStateBeforeMovement(const float 
 				Player->CheckJumpInput(DeltaSeconds);
 			}
 		}
+	} else if (MovementMode == MOVE_Falling)
+	{
+		TryMantle();
+	}
+
+	// Transition
+	if (Safe_bTransitionFinished)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("FINISHED RM"))
+
+		if (TransitionName == "Mantle")
+		{
+			if (IsValid(TransitionQueuedMontage))
+			{
+				SetMovementMode(MOVE_Flying);
+				CharacterOwner->PlayAnimMontage(TransitionQueuedMontage, TransitionQueuedMontageSpeed, MantleMontageSectionName);
+				TransitionQueuedMontageSpeed = 0.f;
+				TransitionQueuedMontage = nullptr;
+			}
+			else
+			{
+				SetMovementMode(MOVE_Walking);
+			}
+		}
+
+		TransitionName = TEXT("");
+		Safe_bTransitionFinished = false;
 	}
 	
 	Super::UpdateCharacterStateBeforeMovement(DeltaSeconds);
+}
+
+void UFmPlayerMovementComponent::UpdateCharacterStateAfterMovement(float DeltaSeconds)
+{
+	Super::UpdateCharacterStateAfterMovement(DeltaSeconds);
+
+	if (!HasAnimRootMotion() && bHadAnimRootMotion && MovementMode == MOVE_Flying)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Ending Anim Root Motion"))
+		SetMovementMode(MOVE_Walking);
+	}
+
+	if (GetRootMotionSourceByID(TransitionRMS_ID) && GetRootMotionSourceByID(TransitionRMS_ID)->Status.HasFlag(ERootMotionSourceStatusFlags::Finished))
+	{
+		RemoveRootMotionSourceByID(TransitionRMS_ID);
+		Safe_bTransitionFinished = true;
+	}
+	
+	bHadAnimRootMotion = HasAnimRootMotion();
 }
 
 void UFmPlayerMovementComponent::ToggleCrouch()
@@ -92,7 +138,10 @@ void UFmPlayerMovementComponent::OnMovementModeChanged(const EMovementMode Previ
 	if (PreviousMovementMode == MOVE_Falling)
 	{
 		GravityScale = BaseGravityScale;
-		
+	}
+
+	if (PreviousMovementMode == MOVE_Falling || PreviousMovementMode == MOVE_Flying)
+	{
 		if (Player && !Player->AllowedToJump())
 		{
 			Player->GetWorldTimerManager().SetTimer(JumpCooldownTimerHandle, this, &ThisClass::AllowJump, JumpCooldownTime);
@@ -142,16 +191,17 @@ bool UFmPlayerMovementComponent::TryMantle()
 		
 		const auto CapsuleBaseLocation = UpdatedComponent->GetComponentLocation() + FVector::DownVector * CapsuleHalfHeight;
 		const auto ForwardNormal2d = UpdatedComponent->GetForwardVector().GetSafeNormal2D();
+		const auto MaxMantleHeight = CapsuleHalfHeight * 2.0 + MantleReachHeight;
 	
 		// The valid forward distance of the mantle depends on the character's velocity.
 		const auto ValidForwardDistance = FMath::Clamp(Velocity.Dot(ForwardNormal2d),
-			CapsuleRadius + 30.0, UKismetMathLibrary::Conv_FloatToDouble(MantleMaxDistance));
+			CapsuleRadius + MantleMinDistanceOffset, UKismetMathLibrary::Conv_FloatToDouble(MantleMaxDistance));
 		
 		FHitResult FrontHit;
-		// Start tracing at the height where the character can't just step up onto something.
+		// Enable mantling starting from the height at which the character can't just step up onto something.
 		auto FrontTraceStart = CapsuleBaseLocation + FVector::UpVector * UKismetMathLibrary::Conv_FloatToDouble(MaxStepHeight - 1.f);
 
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < NumMantleFrontTraceDivisions + 1; i++)
 		{
 			if (UKismetSystemLibrary::LineTraceSingle(this, FrontTraceStart, FrontTraceStart + ForwardNormal2d * ValidForwardDistance,
 				UEngineTypes::ConvertToTraceType(TRACE_CHANNEL_CLIMBABLE), false, TArray<AActor*>(),
@@ -160,84 +210,95 @@ bool UFmPlayerMovementComponent::TryMantle()
 				break;
 			}
 		
-			FrontTraceStart += FVector::UpVector * ((2.0 * CapsuleHalfHeight - (MaxStepHeight - 1.0)) / 5.0);
+			FrontTraceStart += FVector::UpVector * ((MaxMantleHeight - (MaxStepHeight - 1.0)) / NumMantleFrontTraceDivisions);
 		}
 
-		// auto Params = Player->GetIgnoreCharacterParams();
-		float MaxHeight = Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 2+ MantleReachHeight;
-		float CosMMWSA = FMath::Cos(FMath::DegreesToRadians(MantleMinWallSteepnessAngle));
-		float CosMMSA = FMath::Cos(FMath::DegreesToRadians(MantleMaxSurfaceAngle));
-		float CosMMAA = FMath::Cos(FMath::DegreesToRadians(MantleMaxAlignmentAngle));
-		////
-
-	
+		// No valid front surface to mantle.
 		if (!FrontHit.IsValidBlockingHit()) return false;
-		float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
-		if (FMath::Abs(CosWallSteepnessAngle) > CosMMWSA || (ForwardNormal2d | -FrontHit.Normal) < CosMMAA) return false;
-		
-		UE_LOG(LogTemp, Warning, TEXT("TryMantle - 2")) // TODO(P0): Remove log.
-
-		// POINT(FrontHit.Location, FColor::Red);
 	
-		// Check Height
-		TArray<FHitResult> HeightHits;
-		FHitResult SurfaceHit;
-		FVector WallUp = FVector::VectorPlaneProject(FVector::UpVector, FrontHit.Normal).GetSafeNormal();
-		float WallCos = FVector::UpVector | FrontHit.Normal;
-		float WallSin = FMath::Sqrt(1 - WallCos * WallCos);
-		FVector TraceStart = FrontHit.Location + ForwardNormal2d + WallUp * (MaxHeight - (MaxStepHeight - 1)) / WallSin;
-		// LINE(TraceStart, FrontHit.Location + ForwardNormal2d, FColor::Orange)
-		if (!GetWorld()->LineTraceMultiByProfile(HeightHits, TraceStart, FrontHit.Location + ForwardNormal2d, "BlockAll"/*, Params*/)) return false;
-		for (const FHitResult& Hit : HeightHits)
+		const auto WallSteepnessAngle = FMath::RadiansToDegrees(FMath::Acos(FrontHit.ImpactNormal.Dot(FVector::UpVector)));
+		const auto WallApproachAngle = FMath::RadiansToDegrees(FMath::Acos(ForwardNormal2d.Dot(-FrontHit.ImpactNormal)));
+
+		if (bDebugMantle)
 		{
-			if (Hit.IsValidBlockingHit())
-			{
-				SurfaceHit = Hit;
-				break;
-			}
+			UE_LOG(LogTemp, Warning, TEXT("TryMantle WallSteepnessAngle: %g"), WallSteepnessAngle)
+			UE_LOG(LogTemp, Warning, TEXT("TryMantle WallApproachAngle: %g"), WallApproachAngle)
 		}
-		if (!SurfaceHit.IsValidBlockingHit() || (SurfaceHit.Normal | FVector::UpVector) < CosMMSA) return false;
-		float Height = (SurfaceHit.Location - CapsuleBaseLocation) | FVector::UpVector;
 
-		// SLOG(FString::Printf(TEXT("Height: %f"), Height))
-		// POINT(SurfaceHit.Location, FColor::Blue);
+		// Wall or approach angle is invalid.
+		if (WallSteepnessAngle < MantleMinWallSteepnessAngle || WallApproachAngle > MantleMaxAlignmentAngle) return false;
 	
-		if (Height > MaxHeight) return false;
-	
+		FHitResult SurfaceHit;
+		
+		const auto WallUp = FVector::VectorPlaneProject(FVector::UpVector, FrontHit.ImpactNormal).GetSafeNormal();
+		const auto WallCos = WallUp.Dot(FVector::UpVector);
 
-		// Check Clearance
-		float SurfaceCos = FVector::UpVector | SurfaceHit.Normal;
-		float SurfaceSin = FMath::Sqrt(1 - SurfaceCos * SurfaceCos);
-		FVector ClearCapLoc = SurfaceHit.Location + ForwardNormal2d * Player->GetCapsuleComponent()->GetScaledCapsuleRadius() + FVector::UpVector * (Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 1 + Player->GetCapsuleComponent()->GetScaledCapsuleRadius() * 2 * SurfaceSin);
-		FCollisionShape CapShape = FCollisionShape::MakeCapsule(Player->GetCapsuleComponent()->GetScaledCapsuleRadius(), Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight());
-		if (GetWorld()->OverlapAnyTestByProfile(ClearCapLoc, FQuat::Identity, "BlockAll", CapShape /*, Params*/))
+		if (const auto TraceEnd = FrontHit.ImpactPoint + ForwardNormal2d;
+			!UKismetSystemLibrary::LineTraceSingle(this, TraceEnd + WallUp * (MaxMantleHeight - (FrontHit.ImpactPoint.Z - CapsuleBaseLocation.Z)) / WallCos, TraceEnd,
+				UEngineTypes::ConvertToTraceType(TRACE_CHANNEL_CLIMBABLE), false, TArray<AActor*>(),
+				bDebugMantle ? EDrawDebugTrace::ForDuration : EDrawDebugTrace::None, SurfaceHit, true))
 		{
-			// CAPSULE(ClearCapLoc, FColor::Red)
+			return false;
+		}
+
+		if (!SurfaceHit.IsValidBlockingHit()) return false;
+
+		const auto SurfaceCos = SurfaceHit.ImpactNormal.Dot(FVector::UpVector);
+		const auto MantleSurfaceAngle = FMath::RadiansToDegrees(FMath::Acos(SurfaceCos));
+		const auto SurfaceHeight = (SurfaceHit.Location - CapsuleBaseLocation).Dot(FVector::UpVector);
+
+		if (bDebugMantle)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("TryMantle MantleSurfaceAngle: %g"), MantleSurfaceAngle)
+			UE_LOG(LogTemp, Warning, TEXT("TryMantle SurfaceCos: %g"), SurfaceCos)
+			UE_LOG(LogTemp, Warning, TEXT("TryMantle SurfaceHeight: %g"), SurfaceHeight)
+		}
+		
+		if (MantleSurfaceAngle > MantleMaxSurfaceAngle) return false;
+		
+		if (SurfaceHeight > MaxMantleHeight) return false;
+
+		const auto X = 180 - 90 - (90 - MantleSurfaceAngle);
+		const auto CosX = FMath::Cos(FMath::DegreesToRadians(X));
+		const auto Adj = CapsuleRadius;
+		const auto Hyp = Adj / CosX;
+		const auto Opp = FMath::Sqrt(FMath::Pow(Hyp, 2) - FMath::Pow(Adj, 2));
+		const auto Foo = ForwardNormal2d.Dot(SurfaceHit.ImpactNormal);
+		UE_LOG(LogTemp, Warning, TEXT("TryMantle Angle: %g , Adjacent: %g, Opposite: %g, Hyp: %g, Foo: %g"), X, Adj, Opp, Hyp, Foo)
+
+		const auto SurfaceSin = FMath::Sin(FMath::Acos(SurfaceCos));
+		// FVector ClearCapLoc = SurfaceHit.Location + ForwardNormal2d * CapsuleRadius + FVector::UpVector * (CapsuleHalfHeight + 1.0 + CapsuleRadius * 2 * FMath::Sin(X));
+		FVector ClearCapLoc = SurfaceHit.Location + ForwardNormal2d * CapsuleRadius + FVector::UpVector * (CapsuleHalfHeight + 1.0 + (Foo > 0 ? -1 : 1) * Opp);
+		
+		FCollisionShape CapShape = FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight);
+		FCollisionQueryParams CollisionQueryParams;
+		CollisionQueryParams.AddIgnoredActor(Player);
+		if (GetWorld()->OverlapAnyTestByProfile(ClearCapLoc, FQuat::Identity, "BlockAll", CapShape, CollisionQueryParams))
+		{
+			UKismetSystemLibrary::DrawDebugCapsule(this, ClearCapLoc, CapsuleHalfHeight, CapsuleRadius, Player->GetActorRotation(), FColor::Red, 5.f);
 			return false;
 		}
 		else
 		{
-			// CAPSULE(ClearCapLoc, FColor::Green)
+			UKismetSystemLibrary::DrawDebugCapsule(this, ClearCapLoc, CapsuleHalfHeight, CapsuleRadius, Player->GetActorRotation(), FColor::Green, 5.f);
 		}
-		// SLOG("Can Mantle")
-	
-		// Mantle Selection
-		FVector ShortMantleTarget = GetMantleStartLocation(FrontHit, SurfaceHit, false);
-		FVector TallMantleTarget = GetMantleStartLocation(FrontHit, SurfaceHit, true);
+
+		FVector ShortMantleTarget = GetMantleStartLocation(FrontHit, SurfaceHit, CapsuleHalfHeight, CapsuleRadius, false);
+		FVector TallMantleTarget = GetMantleStartLocation(FrontHit, SurfaceHit, CapsuleHalfHeight, CapsuleRadius, true);
 	
 		bool bTallMantle = false;
-		if (MovementMode == MOVE_Walking && Height > Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 2)
+		if (MovementMode == MOVE_Walking && SurfaceHeight > CapsuleHalfHeight * 2)
 			bTallMantle = true;
 		else if (MovementMode == MOVE_Falling && (Velocity | FVector::UpVector) < 0)
 		{
-			if (!GetWorld()->OverlapAnyTestByProfile(TallMantleTarget, FQuat::Identity, "BlockAll", CapShape/*, Params*/))
+			if (!GetWorld()->OverlapAnyTestByProfile(TallMantleTarget, FQuat::Identity, "BlockAll", CapShape, CollisionQueryParams))
+			{
 				bTallMantle = true;
+			}
 		}
-		FVector TransitionTarget = bTallMantle ? TallMantleTarget : ShortMantleTarget;
-		// CAPSULE(TransitionTarget, FColor::Yellow)
 
-		// Perform Transition to Mantle
-		// CAPSULE(UpdatedComponent->GetComponentLocation(), FColor::Red)
+		FVector TransitionTarget = bTallMantle ? TallMantleTarget : ShortMantleTarget;
+		UKismetSystemLibrary::DrawDebugCapsule(this, TransitionTarget, CapsuleHalfHeight, CapsuleRadius, Player->GetActorRotation(), FColor::Yellow, 5.f);
 
 		float UpSpeed = Velocity | FVector::UpVector;
 		float TransDistance = FVector::Dist(TransitionTarget, UpdatedComponent->GetComponentLocation());
@@ -248,7 +309,6 @@ bool UFmPlayerMovementComponent::TryMantle()
 		TransitionRMS->AccumulateMode = ERootMotionAccumulateMode::Override;
 	
 		TransitionRMS->Duration = FMath::Clamp(TransDistance / 500.f, .1f, .25f);
-		// SLOG(FString::Printf(TEXT("Duration: %f"), TransitionRMS->Duration))
 		TransitionRMS->StartLocation = UpdatedComponent->GetComponentLocation();
 		TransitionRMS->TargetLocation = TransitionTarget;
 
@@ -261,12 +321,14 @@ bool UFmPlayerMovementComponent::TryMantle()
 		// Animations
 		if (bTallMantle)
 		{
-			TransitionQueuedMontage = TallMantleMontage;
+			TransitionQueuedMontage = MantlesMontage;
+			MantleMontageSectionName = FName("MantleTall");
 			// Player->PlayAnimMontage(TransitionTallMantleMontage, 1 / TransitionRMS->Duration);
 		}
 		else
 		{
-			TransitionQueuedMontage = ShortMantleMontage;
+			TransitionQueuedMontage = MantlesMontage;
+			MantleMontageSectionName = FName("MantleShort");
 			// Player->PlayAnimMontage(TransitionShortMantleMontage, 1 / TransitionRMS->Duration);
 		}
 
@@ -276,8 +338,18 @@ bool UFmPlayerMovementComponent::TryMantle()
 	return false;
 }
 
-FVector UFmPlayerMovementComponent::GetMantleStartLocation(const FHitResult& FrontHit, const FHitResult& SurfaceHit,
-	const bool bTallMantle) const
+FVector UFmPlayerMovementComponent::GetMantleStartLocation(const FHitResult& FrontHit, const FHitResult& SurfaceHit, const float CapsuleHalfHeight, const float CapsuleRadius, const bool bTallMantle) const
 {
-	return FVector();
+	float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
+	float DownDistance = bTallMantle ? CapsuleHalfHeight * 2.f : MaxStepHeight - 1;
+	FVector EdgeTangent = FVector::CrossProduct(SurfaceHit.Normal, FrontHit.Normal).GetSafeNormal();
+
+	FVector MantleStart = SurfaceHit.Location;
+	MantleStart += FrontHit.Normal.GetSafeNormal2D() * (2.f + CapsuleRadius);
+	MantleStart += UpdatedComponent->GetForwardVector().GetSafeNormal2D().ProjectOnTo(EdgeTangent) * CapsuleRadius * .3f;
+	MantleStart += FVector::UpVector * CapsuleHalfHeight;
+	MantleStart += FVector::DownVector * DownDistance;
+	MantleStart += FrontHit.Normal.GetSafeNormal2D() * CosWallSteepnessAngle * DownDistance;
+
+	return MantleStart;
 }
