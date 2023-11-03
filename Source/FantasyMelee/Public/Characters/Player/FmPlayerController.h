@@ -22,6 +22,7 @@ class FANTASYMELEE_API AFmPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
+	void Init() const;
 	void OnTagSpecGrant(const FFmTagSpec& TagSpec) const;
 
 	FORCEINLINE AFmHud* GetCustomHud() const { return CustomHud; }

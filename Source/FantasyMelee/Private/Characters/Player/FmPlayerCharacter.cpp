@@ -65,6 +65,7 @@ void AFmPlayerCharacter::PossessedBy(AController* NewController)
 	}
 
 	CustomPlayerController = CastChecked<AFmPlayerController>(NewController);
+	CustomPlayerController->Init();
 	
 	FGameplayTagContainer PlayerTags;
 	GetOwnedGameplayTags(PlayerTags);

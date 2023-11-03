@@ -13,6 +13,11 @@
 #include "Tags/InGameTags.h"
 #include "UI/FmHud.h"
 
+void AFmPlayerController::Init() const
+{
+	ActivateInputMappingContext(BaseInputMappingContext);
+}
+
 void AFmPlayerController::OnTagSpecGrant(const FFmTagSpec& TagSpec) const
 {
 	if (TagSpec.Tag.MatchesTagExact(TAG_InGame_BlockInput))
