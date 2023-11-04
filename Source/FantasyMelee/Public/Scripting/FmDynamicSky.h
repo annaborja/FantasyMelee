@@ -6,6 +6,13 @@
 #include "GameFramework/Actor.h"
 #include "FmDynamicSky.generated.h"
 
+UENUM(BlueprintType)
+enum EFmDynamicSkyCloudMode : uint8
+{
+	None,
+	TwoDimensional
+};
+
 UCLASS()
 class FANTASYMELEE_API AFmDynamicSky : public AActor
 {
