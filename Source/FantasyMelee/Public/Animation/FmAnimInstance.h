@@ -25,5 +25,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement")
 	bool bIsFalling = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement")
+	bool bIsInjured = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Movement")
 	bool bIsMoving = false;
 };

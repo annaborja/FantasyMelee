@@ -20,13 +20,18 @@ public:
 	explicit AFmCharacter(const FObjectInitializer& ObjectInitializer) : AFmCharacter() {}
 	
 	virtual void BeginPlay() override;
-	
+
 	virtual UFmCombatComponent* GetCombatComponent() const override { return CombatComponent; }
 	virtual FFmMontageData GetHitReactionMontageData() const override { return HitReactionMontageData; }
 
 	virtual UFmInventoryComponent* GetInventoryComponent() const override { return InventoryComponent; };
 
 	virtual UMotionWarpingComponent* GetMotionWarpingComponent() const override { return MotionWarpingComponent; }
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleInjured(const bool bInIsInjured);
+
+	FORCEINLINE bool IsInjured() const { return bIsInjured; }
 
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -36,6 +41,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="FM Assets")
 	FFmMontageData HitReactionMontageData;
+	
+	UPROPERTY(EditAnywhere, Category="FM Params")
+	bool bIsInjured = false;
 	
 	UPROPERTY(Transient)
 	TObjectPtr<UFmCombatComponent> CombatComponent;

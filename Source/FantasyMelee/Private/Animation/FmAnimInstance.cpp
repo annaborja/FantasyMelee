@@ -3,6 +3,7 @@
 #include "Animation/FmAnimInstance.h"
 
 #include "KismetAnimationLibrary.h"
+#include "Characters/FmCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -11,7 +12,7 @@ void UFmAnimInstance::NativeUpdateAnimation(const float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	if (const auto Character = Cast<ACharacter>(TryGetPawnOwner()))
+	if (const auto Character = Cast<AFmCharacter>(TryGetPawnOwner()))
 	{
 		if (const auto MovementComponent = Character->GetCharacterMovement())
 		{
@@ -20,6 +21,7 @@ void UFmAnimInstance::NativeUpdateAnimation(const float DeltaSeconds)
 			VerticalSpeed = MovementComponent->Velocity.Z;
 			bIsCrouched = Character->bIsCrouched;
 			bIsFalling = MovementComponent->IsFalling();
+			bIsInjured = Character->IsInjured();
 			bIsMoving = GroundSpeed > 100.f;
 		}
 	}

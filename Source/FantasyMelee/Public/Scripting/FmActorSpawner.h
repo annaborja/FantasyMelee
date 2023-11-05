@@ -39,8 +39,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="FM Params")
 	TSubclassOf<AActor> ActorClass;
-	UPROPERTY(EditAnywhere, Category="FM Params")
-	FVector BoxExtent = FVector(34.f, 34.f, 88.f);
 	
 	UPROPERTY(EditAnywhere, Category="FM Params")
 	FFmEntityTagSpec TagRequirements;

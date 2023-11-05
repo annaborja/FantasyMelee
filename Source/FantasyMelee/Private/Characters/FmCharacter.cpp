@@ -20,3 +20,8 @@ void AFmCharacter::BeginPlay()
 	check(CombatComponent);
 	check(HitReactionMontageData.IsValid());
 }
+
+void AFmCharacter::ToggleInjured(const bool bInIsInjured)
+{
+	bIsInjured = bInIsInjured;
+}

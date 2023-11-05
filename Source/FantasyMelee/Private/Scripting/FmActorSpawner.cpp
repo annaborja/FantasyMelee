@@ -5,7 +5,6 @@
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Utils/Constants.h"
 #include "Utils/FmBlueprintFunctionLibrary.h"
 
 AFmActorSpawner::AFmActorSpawner(): AActor()
@@ -13,10 +12,15 @@ AFmActorSpawner::AFmActorSpawner(): AActor()
 	// TODO(P1): Optimize for performance.
 	PrimaryActorTick.bCanEverTick = true;
 
-	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("SpawnArea"));
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetupAttachment(GetRootComponent());
-	BoxComponent->SetBoxExtent(BoxExtent);
-	BoxComponent->SetCollisionResponseToChannel(OBJECT_CHANNEL_PLAYER, ECR_Overlap);
+	BoxComponent->SetBoxExtent(FVector(34.f, 34.f, 88.f));
+	BoxComponent->SetMobility(EComponentMobility::Static);
+	
+	BoxComponent->SetCanEverAffectNavigation(false);
+	BoxComponent->SetGenerateOverlapEvents(false);
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ForwardArrow"));
 	ArrowComponent->SetupAttachment(BoxComponent);
