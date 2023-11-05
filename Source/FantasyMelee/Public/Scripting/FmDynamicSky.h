@@ -7,11 +7,14 @@
 #include "FmDynamicSky.generated.h"
 
 UENUM(BlueprintType)
-enum EFmDynamicSkyCloudMode : uint8
+namespace EFmDynamicSkyCloudMode
 {
-	None,
-	TwoDimensional
-};
+	enum Type : uint8
+	{
+		None,
+		TwoDimensional
+	};
+}
 
 UCLASS()
 class FANTASYMELEE_API AFmDynamicSky : public AActor

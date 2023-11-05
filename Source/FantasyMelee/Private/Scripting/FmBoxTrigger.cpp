@@ -16,8 +16,19 @@ AFmBoxTrigger::AFmBoxTrigger(): AActor()
 
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetupAttachment(GetRootComponent());
-	BoxComponent->SetBoxExtent(BoxExtent);
-	BoxComponent->SetCollisionResponseToChannel(OBJECT_CHANNEL_PLAYER, ECR_Overlap);
+	BoxComponent->SetBoxExtent(FVector(68.f, 136.f, 88.f));
+	BoxComponent->SetMobility(EComponentMobility::Static);
+	
+	BoxComponent->SetCanEverAffectNavigation(false);
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	for (const auto CollisionChannel : (TArray { ECC_Camera, ECC_WorldStatic, ECC_WorldDynamic,
+		ECC_Pawn, ECC_PhysicsBody, ECC_Vehicle, ECC_Destructible, OBJECT_CHANNEL_PLAYER }))
+	{
+		BoxComponent->SetCollisionResponseToChannel(CollisionChannel, ECR_Overlap);
+	}
+	
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnBoxBeginOverlap);
 }
 

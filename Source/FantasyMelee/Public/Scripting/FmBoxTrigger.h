@@ -92,9 +92,6 @@ private:
 	TObjectPtr<UBoxComponent> BoxComponent;
 
 	UPROPERTY(EditAnywhere, Category="FM Params")
-	FVector BoxExtent = FVector(64.f, 128.f, 88.f);
-	
-	UPROPERTY(EditAnywhere, Category="FM Params")
 	FGameplayTagContainer GameplayTags;
 	UPROPERTY(EditAnywhere, Category="FM Params")
 	FGameplayTag TagId;
