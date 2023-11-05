@@ -14,6 +14,7 @@
 #include "Interfaces/FmMotionWarpable.h"
 #include "Interfaces/FmTagIdable.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Tags/NpcTags.h"
 
 UFmAbilitySystemComponent* UFmBlueprintFunctionLibrary::GetAbilitySystemComponent(AActor* Actor)

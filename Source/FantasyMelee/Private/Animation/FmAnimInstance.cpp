@@ -14,6 +14,8 @@ void UFmAnimInstance::NativeUpdateAnimation(const float DeltaSeconds)
 
 	if (const auto Character = Cast<AFmCharacter>(TryGetPawnOwner()))
 	{
+		bIsInjured = Character->IsInjured();
+		
 		if (const auto MovementComponent = Character->GetCharacterMovement())
 		{
 			GroundSpeed = UKismetMathLibrary::VSizeXY(MovementComponent->Velocity);
@@ -21,7 +23,6 @@ void UFmAnimInstance::NativeUpdateAnimation(const float DeltaSeconds)
 			VerticalSpeed = MovementComponent->Velocity.Z;
 			bIsCrouched = Character->bIsCrouched;
 			bIsFalling = MovementComponent->IsFalling();
-			bIsInjured = Character->IsInjured();
 			bIsMoving = GroundSpeed > 100.f;
 		}
 	}

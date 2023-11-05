@@ -14,6 +14,16 @@ class UFmVitalAttributeSet;
 class UFmPrimaryAttributeSet;
 class UFmAbilitySystemComponent;
 
+UENUM(BlueprintType)
+namespace EFmNpcEmotionalState
+{
+	enum Type : uint8
+	{
+		Neutral,
+		Scared
+	};
+}
+
 UCLASS()
 class FANTASYMELEE_API AFmNpcCharacter : public AFmCharacter, public IAbilitySystemInterface
 {
@@ -29,6 +39,10 @@ public:
 
 	void Attack() const;
 
+	UFUNCTION(BlueprintCallable)
+	void SetEmotionalState(const EFmNpcEmotionalState::Type InEmotionalState);
+
+	FORCEINLINE EFmNpcEmotionalState::Type GetEmotionalState() const { return EmotionalState; }
 	FORCEINLINE float GetFindTargetSphereRadius() const { return FindTargetSphereRadius; }
 	FORCEINLINE bool ShouldDebugFindTargetSphere() const { return bDebugFindTargetSphere; }
 
@@ -45,6 +59,9 @@ protected:
 	TObjectPtr<AFmAiController> AiController;
 	UPROPERTY(EditDefaultsOnly, Category="AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="FM Params")
+	TEnumAsByte<EFmNpcEmotionalState::Type> EmotionalState = EFmNpcEmotionalState::Neutral;
 	
 	UPROPERTY(EditDefaultsOnly, Category="AI|Find Target")
 	float FindTargetSphereRadius = 1000.f;

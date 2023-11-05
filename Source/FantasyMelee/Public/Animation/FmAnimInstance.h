@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/NPCs/FmNpcCharacter.h"
 #include "FmAnimInstance.generated.h"
 
 UCLASS()

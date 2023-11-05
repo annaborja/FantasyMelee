@@ -42,7 +42,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="FM Assets")
 	FFmMontageData HitReactionMontageData;
 	
-	UPROPERTY(EditAnywhere, Category="FM Params")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="FM Params")
 	bool bIsInjured = false;
 	
 	UPROPERTY(Transient)

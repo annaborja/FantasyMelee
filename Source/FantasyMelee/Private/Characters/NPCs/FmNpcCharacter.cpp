@@ -83,3 +83,8 @@ void AFmNpcCharacter::Attack() const
 		AbilitySystemComponent->TryActivateAbilityByTag(TAG_Action_Combat_Attack_Unarmed_Jab);
 	}
 }
+
+void AFmNpcCharacter::SetEmotionalState(const EFmNpcEmotionalState::Type InEmotionalState)
+{
+	EmotionalState = InEmotionalState;
+}
