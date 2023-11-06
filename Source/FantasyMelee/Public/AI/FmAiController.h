@@ -14,7 +14,7 @@ class FANTASYMELEE_API AFmAiController : public AAIController
 	GENERATED_BODY()
 
 public:
-	AFmAiController();
+	explicit AFmAiController(const FObjectInitializer& ObjectInitializer);
 
 private:
 	UPROPERTY(VisibleAnywhere)
