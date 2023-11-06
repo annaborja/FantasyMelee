@@ -51,17 +51,17 @@ void AFmBoxTrigger::OnBoxBeginOverlap_Implementation(UPrimitiveComponent* Overla
 		
 		switch (TriggerEffect.Type)
 		{
-		case DestroyActor:
+		case EFmTriggerEffectType::DestroyActor:
 			TriggerEffect.bExecuted = HandleDestroyActor(TriggerEffect, OtherActor);
 			break;
-		case GrantTag:
+		case EFmTriggerEffectType::GrantTag:
 			TriggerEffect.bExecuted = HandleGrantTag(TriggerEffect, OtherActor);
 			break;
-		case ProcessEntityTagSpec:
+		case EFmTriggerEffectType::ProcessEntityTagSpec:
 			TriggerEffect.bExecuted = HandleProcessEntityTagSpec(TriggerEffect, OtherActor);
 			break;
-		case SetLookTarget:
-		case SetMoveTarget:
+		case EFmTriggerEffectType::SetLookTarget:
+		case EFmTriggerEffectType::SetMoveTarget:
 			TriggerEffect.bExecuted = HandleSetBlackboardKey(TriggerEffect, OtherActor);
 			break;
 		default:
@@ -118,7 +118,7 @@ bool AFmBoxTrigger::HandleSetBlackboardKey(const FFmTriggerEffect& TriggerEffect
 	const auto& TargetTagIdA = TriggerEffect.TargetA.TagId;
 	const auto& TargetTagIdB = TriggerEffect.TargetB.TagId;
 	AActor* AffectedActor = nullptr;
-	AActor* NewMoveTarget = nullptr;
+	AActor* NewTarget = nullptr;
 	
 	TArray<AActor*> OverlapActorsA;
 	UKismetSystemLibrary::SphereOverlapActors(this, GetActorLocation(), TriggerEffect.TargetA.OverlapSphereRadius,
@@ -142,7 +142,7 @@ bool AFmBoxTrigger::HandleSetBlackboardKey(const FFmTriggerEffect& TriggerEffect
 		}
 	}
 
-	// If no target class is set for target B, set the move target to null.
+	// If no target class is set for target B, set the target to null.
 	if (TriggerEffect.TargetB.TargetClass)
 	{
 		TArray<AActor*> OverlapActorsB;
@@ -153,7 +153,7 @@ bool AFmBoxTrigger::HandleSetBlackboardKey(const FFmTriggerEffect& TriggerEffect
 		{
 			if (!TargetTagIdB.IsValid())
 			{
-				NewMoveTarget = ActorB;
+				NewTarget = ActorB;
 				break;
 			}
 		
@@ -161,7 +161,7 @@ bool AFmBoxTrigger::HandleSetBlackboardKey(const FFmTriggerEffect& TriggerEffect
 			{
 				if (const auto& TagIdB = TagIdableB->GetTagId(); TagIdB.IsValid() && TagIdB.MatchesTagExact(TargetTagIdB))
 				{
-					NewMoveTarget = ActorB;
+					NewTarget = ActorB;
 					break;
 				}
 			}
@@ -178,10 +178,10 @@ bool AFmBoxTrigger::HandleSetBlackboardKey(const FFmTriggerEffect& TriggerEffect
 
 				switch (TriggerEffect.Type)
 				{
-				case SetLookTarget:
+				case EFmTriggerEffectType::SetLookTarget:
 					SelectorName = FName(BLACKBOARD_KEY_LOOK_TARGET);
 					break;
-				case SetMoveTarget:
+				case EFmTriggerEffectType::SetMoveTarget:
 					SelectorName = FName(BLACKBOARD_KEY_MOVE_TARGET);
 					break;
 				default:
@@ -190,7 +190,15 @@ bool AFmBoxTrigger::HandleSetBlackboardKey(const FFmTriggerEffect& TriggerEffect
 
 				if (SelectorName.IsNone()) return false;
 				
-				BlackboardComponent->SetValueAsObject(SelectorName, NewMoveTarget);
+				if (TriggerEffect.Type == EFmTriggerEffectType::SetMoveTarget && TriggerEffect.bChangeMoveTargetOnlyIfTargetIsCurrent)
+				{
+					if (const auto CurrentTarget = BlackboardComponent->GetValueAsObject(SelectorName); CurrentTarget != this)
+					{
+						return false;
+					}
+				}
+				
+				BlackboardComponent->SetValueAsObject(SelectorName, NewTarget);
 			}
 		}
 	}

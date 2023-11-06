@@ -14,14 +14,17 @@ struct FFmTagSpec;
 class UBoxComponent;
 
 UENUM()
-enum EFmTriggerEffectType : uint8
+namespace EFmTriggerEffectType
 {
-	DestroyActor,
-	GrantTag,
-	ProcessEntityTagSpec,
-	SetLookTarget,
-	SetMoveTarget,
-};
+	enum Type : uint8
+	{
+		DestroyActor,
+		GrantTag,
+		ProcessEntityTagSpec,
+		SetLookTarget,
+		SetMoveTarget,
+	};
+}
 
 USTRUCT()
 struct FFmTriggerEffectTarget
@@ -47,13 +50,16 @@ struct FFmTriggerEffect
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere)
-	TEnumAsByte<EFmTriggerEffectType> Type = GrantTag;
+	TEnumAsByte<EFmTriggerEffectType::Type> Type = EFmTriggerEffectType::GrantTag;
 	
 	UPROPERTY(EditAnywhere)
 	bool bExecuteOnceOnly = true;
 	
 	UPROPERTY(VisibleInstanceOnly)
 	bool bExecuted = false;
+	
+	UPROPERTY(EditAnywhere)
+	bool bChangeMoveTargetOnlyIfTargetIsCurrent = false;
 
 	UPROPERTY(EditAnywhere)
 	TArray<TSubclassOf<AActor>> ActorClassFilter { AFmPlayerCharacter::StaticClass() };
