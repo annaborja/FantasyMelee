@@ -11,6 +11,7 @@
 #include "Interfaces/FmTagSpecGrantable.h"
 #include "FmMajorNpcCharacter.generated.h"
 
+class UDialogueVoice;
 class AFantasyMeleeGameModeBase;
 struct FFmDialogueOptionData;
 struct FFmDialogueStepData;
@@ -69,6 +70,9 @@ private:
 	TObjectPtr<USphereComponent> InteractionSphere;
 	UPROPERTY(VisibleAnywhere, Category="Interaction")
 	float InteractionSphereRadius = 100.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FM Assets")
+	TObjectPtr<UDialogueVoice> DialogueVoice;
 	
 	UPROPERTY(EditAnywhere, Category="FM Debug")
 	bool bDebugGrantTagSpec = false;
