@@ -63,6 +63,10 @@ public:
 
 	FORCEINLINE UFmDialogueComponent* GetDialogueComponent() const { return DialogueComponent; }
 
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FM Assets")
+	TObjectPtr<UDialogueVoice> DialogueVoice;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category="Interaction")
 	TObjectPtr<UFmDialogueComponent> DialogueComponent;
@@ -70,9 +74,6 @@ private:
 	TObjectPtr<USphereComponent> InteractionSphere;
 	UPROPERTY(VisibleAnywhere, Category="Interaction")
 	float InteractionSphereRadius = 100.f;
-	
-	UPROPERTY(EditDefaultsOnly, Category="FM Assets")
-	TObjectPtr<UDialogueVoice> DialogueVoice;
 	
 	UPROPERTY(EditAnywhere, Category="FM Debug")
 	bool bDebugGrantTagSpec = false;

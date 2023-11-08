@@ -32,7 +32,7 @@ FFmDialogueData* UFmDialogueComponent::GetAvailableDialogue(const AFmPlayerChara
 
 	if (FFmDialogueData** DialogueDataPtr = OutRows.FindByPredicate([PlayerGameplayTags](const FFmDialogueData* DialogueData)
 	{
-		for (const auto& TagSpec : DialogueData->GameplayTagRequirements.PlayerTagSpecs)
+		for (const auto& TagSpec : DialogueData->TagRequirements.PlayerTagSpecs)
 		{
 			if (!PlayerGameplayTags.HasTagExact(TagSpec.Tag)) return false;
 		}
@@ -120,7 +120,7 @@ void UFmDialogueComponent::StartDialogue(AFmPlayerController* PlayerController, 
 
 void UFmDialogueComponent::AdvanceDialogueStep(const FFmDialogueStepData DialogueStepData, AFmPlayerController* PlayerController, const AFmHud* Hud) const
 {
-	UFmBlueprintFunctionLibrary::ProcessEntityTagSpecGrants(this, DialogueStepData.GameplayTagGrants);
+	UFmBlueprintFunctionLibrary::ProcessEntityTagSpecGrants(this, DialogueStepData.TagGrants);
 	
 	if (DialogueStepData.PotentialDialogueOptions.Num() > 0)
 	{

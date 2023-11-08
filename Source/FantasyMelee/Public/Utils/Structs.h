@@ -52,18 +52,18 @@ struct FFmEntityTagSpec
 	TArray<FFmTagToTagSpecsMapping> WorldTagSpecMappings;
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FFmMontageData
 {
 	GENERATED_BODY()
 
 	bool IsValid() const { return Montage != nullptr; }
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> Montage;
 	
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float Rate = 1.f;
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FName StartSection;
 };

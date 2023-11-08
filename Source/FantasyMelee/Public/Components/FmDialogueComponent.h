@@ -8,6 +8,7 @@
 #include "Engine/DataTable.h"
 #include "FmDialogueComponent.generated.h"
 
+class UDialogueWave;
 class AAIController;
 class AFmMajorNpcCharacter;
 class AFmPlayerCharacter;
@@ -21,10 +22,24 @@ struct FFmDialogueData : public FTableRowBase
 	GENERATED_BODY();
 	
 	UPROPERTY(EditDefaultsOnly)
-	FFmEntityTagSpec GameplayTagRequirements;
+	FFmEntityTagSpec TagRequirements;
+	UPROPERTY(EditDefaultsOnly)
+	FFmEntityTagSpec TagProhibitions;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FDataTableRowHandle> PotentialFirstDialogueSteps;
+};
+
+USTRUCT(BlueprintType)
+struct FFmDialogueLine
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UDialogueWave> DialogueWave;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FFmMontageData MontageData;
 };
 
 USTRUCT(BlueprintType)
@@ -32,14 +47,16 @@ struct FFmDialogueStepData : public FTableRowBase
 {
 	GENERATED_BODY();
 	
-	UPROPERTY(EditDefaultsOnly)
-	FFmEntityTagSpec GameplayTagRequirements;
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FText NpcDialogue;
+	TArray<FFmDialogueLine> DialogueLines;
 	
 	UPROPERTY(EditDefaultsOnly)
-	FFmEntityTagSpec GameplayTagGrants;
+	FFmEntityTagSpec TagRequirements;
+	UPROPERTY(EditDefaultsOnly)
+	FFmEntityTagSpec TagProhibitions;
+	
+	UPROPERTY(EditDefaultsOnly)
+	FFmEntityTagSpec TagGrants;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FDataTableRowHandle> PotentialDialogueOptions;
