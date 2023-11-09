@@ -6,6 +6,17 @@
 #include "GameplayTagContainer.h"
 #include "Structs.generated.h"
 
+UENUM(BlueprintType)
+namespace EFmSpeedCategory
+{
+	enum Type : uint8
+	{
+		Normal,
+		Fast,
+		Slow
+	};
+}
+
 USTRUCT(BlueprintType)
 struct FFmTagSpec
 {

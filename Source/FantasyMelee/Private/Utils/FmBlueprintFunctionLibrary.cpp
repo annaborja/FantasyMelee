@@ -15,7 +15,9 @@
 #include "Interfaces/FmTagIdable.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetStringLibrary.h"
 #include "Tags/NpcTags.h"
+#include "Utils/Macros.h"
 
 UFmAbilitySystemComponent* UFmBlueprintFunctionLibrary::GetAbilitySystemComponent(AActor* Actor)
 {
@@ -169,4 +171,50 @@ void UFmBlueprintFunctionLibrary::ProcessEntityTagSpecGrants(const UObject* Worl
 	}
 
 	// TODO(P0): implement
+}
+
+FText UFmBlueprintFunctionLibrary::GetInGameNameifiedText(const UObject* WorldContextObject, const FText& InText)
+{
+	auto Result = InText.ToString();
+	
+	if (const auto GameMode = Cast<AFantasyMeleeGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
+	{
+		if (const auto MajorNpcDataTable = GameMode->GetMajorNpcDataTable())
+		{
+			TArray<FFmMajorNpcData*> AllRows;
+			FRegexMatcher Matcher(FRegexPattern(TEXT("\\[(.+?)\\]")), InText.ToString());
+			uint8 i = 0;
+	
+			while (Matcher.FindNext())
+			{
+				// Just in case we have a bug somewhere, avoid an infinite loop.
+				if (++i > 100) break;
+
+				if (AllRows.Num() <= 0)
+				{
+					MajorNpcDataTable->GetAllRows(TEXT("GetAllRows"), AllRows);
+				}
+		
+				auto CaptureGroup = Matcher.GetCaptureGroup(0);
+				// UKismetStringLibrary::ReplaceInline(CaptureGroup, "[", "");
+				// UKismetStringLibrary::ReplaceInline(CaptureGroup, "]", "");
+
+				if (const auto RowPtr = AllRows.FindByPredicate([&CaptureGroup](const FFmMajorNpcData* Data)
+				{
+					return Data->Tag.MatchesTagExact(FGameplayTag::RequestGameplayTag(FName(CaptureGroup)));
+				}); RowPtr != nullptr)
+				{
+					if (const auto Row = *RowPtr)
+					{
+						const auto Data = *Row;
+						SCREEN_LOG(UKismetStringLibrary::Replace(Result, "[" + CaptureGroup + "]", Data.Name.ToString()), 4.f);
+					}
+				}
+
+				SCREEN_LOG(CaptureGroup, 4.f)
+			}
+		}
+	}
+	
+	return FText::FromString(Result);
 }

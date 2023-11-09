@@ -77,10 +77,10 @@ public:
 	
 	void Init(AFmPlayerController* InPlayerController);
 
-	void BroadcastQuest(const FFmQuestData& Quest, const EFmQuestBroadcastType QuestBroadcastType) const;
-	void BroadcastQuestStep(const FFmQuestStepData& QuestStep) const;
+	void BroadcastQuest(const FFmQuestData& Quest, const EFmQuestBroadcastType QuestBroadcastType);
+	void BroadcastQuestStep(const FFmQuestStepData& QuestStep);
 	void BroadcastTargetInteractable(const AActor* TargetInteractable) const;
-	void BroadcastTutorial(const FFmTutorialData& Tutorial) const;
+	void BroadcastTutorial(const FFmTutorialData& Tutorial);
 	
 	void OpenMainMenu() const;
 	
@@ -88,6 +88,11 @@ public:
 	void DisplayDialogueOptions(const AFmMajorNpcCharacter* Npc, const TArray<FFmDialogueOptionData>& DialogueOptions) const;
 	void DisplayDialogueStep(const AFmMajorNpcCharacter* Npc, const FFmDialogueStepData& DialogueStep) const;
 	void OpenDialogueFlow();
+	
+	UFUNCTION(BlueprintCallable)
+	void OnNotificationFadeInEnd();
+	UFUNCTION(BlueprintCallable)
+	void OnNotificationFadeOutStart();
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category="FM Classes")
@@ -104,5 +109,11 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UFmPersistentOverlayWidget> PersistentOverlayWidget;
 
+	TArray<TFunction<void ()>> NotificationBroadcastQueue;
+	bool bNotificationActive = false;
+
 	void BroadcastAttributeValue(const FGameplayTag& Tag, const FGameplayAttribute& Attribute, const UFmBaseAttributeSet* AttributeSet) const;
+
+	void ProcessNotificationQueue();
+	void QueueNotificationBroadcast(const TFunction<void ()>& Fn);
 };

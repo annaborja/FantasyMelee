@@ -45,6 +45,9 @@ public:
 	static FGameplayTag GetNormalizedTag(const FGameplayTag& Tag);
 	static bool IsEntityTagSpecSatisfied(const UObject* WorldContextObject, const FFmEntityTagSpec& EntityTagSpec, const bool bProhibition = false);
 	static void ProcessEntityTagSpecGrants(const UObject* WorldContextObject, const FFmEntityTagSpec& EntityTagSpec);
+
+	UFUNCTION(BlueprintCallable)
+	static FText GetInGameNameifiedText(const UObject* WorldContextObject, const FText& InText);
 };
 
 template <typename T>

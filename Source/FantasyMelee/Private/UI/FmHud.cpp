@@ -111,14 +111,20 @@ void AFmHud::Init(AFmPlayerController* InPlayerController)
 	}
 }
 
-void AFmHud::BroadcastQuest(const FFmQuestData& Quest, const EFmQuestBroadcastType QuestBroadcastType) const
+void AFmHud::BroadcastQuest(const FFmQuestData& Quest, const EFmQuestBroadcastType QuestBroadcastType)
 {
-	QuestDelegate.Broadcast(Quest, QuestBroadcastType);
+	QueueNotificationBroadcast([this, Quest, QuestBroadcastType]
+	{
+		QuestDelegate.Broadcast(Quest, QuestBroadcastType);
+	});
 }
 
-void AFmHud::BroadcastQuestStep(const FFmQuestStepData& QuestStep) const
+void AFmHud::BroadcastQuestStep(const FFmQuestStepData& QuestStep)
 {
-	QuestStepDelegate.Broadcast(QuestStep);
+	QueueNotificationBroadcast([this, QuestStep]
+	{
+		QuestStepDelegate.Broadcast(QuestStep);
+	});
 }
 
 void AFmHud::BroadcastTargetInteractable(const AActor* TargetInteractable) const
@@ -126,9 +132,12 @@ void AFmHud::BroadcastTargetInteractable(const AActor* TargetInteractable) const
 	TargetInteractableDelegate.Broadcast(TargetInteractable);
 }
 
-void AFmHud::BroadcastTutorial(const FFmTutorialData& Tutorial) const
+void AFmHud::BroadcastTutorial(const FFmTutorialData& Tutorial)
 {
 	TutorialDelegate.Broadcast(Tutorial);
+	// QueueNotificationBroadcast([this, Tutorial]
+	// {
+	// });
 }
 
 void AFmHud::OpenMainMenu() const
@@ -166,7 +175,32 @@ void AFmHud::OpenDialogueFlow()
 	DialogueOverlayWidget = PersistentOverlayWidget->OpenDialogueFlow();
 }
 
+void AFmHud::OnNotificationFadeInEnd()
+{
+}
+
+void AFmHud::OnNotificationFadeOutStart()
+{
+	bNotificationActive = false;
+	ProcessNotificationQueue();
+}
+
 void AFmHud::BroadcastAttributeValue(const FGameplayTag& Tag, const FGameplayAttribute& Attribute, const UFmBaseAttributeSet* AttributeSet) const
 {
 	AttributeValueDelegate.Broadcast(Tag, Attribute.GetNumericValue(AttributeSet));
+}
+
+void AFmHud::ProcessNotificationQueue()
+{
+	if (!NotificationBroadcastQueue.IsValidIndex(0) || bNotificationActive) return;
+
+	NotificationBroadcastQueue[0]();
+	NotificationBroadcastQueue.RemoveAt(0);
+	bNotificationActive = true;
+}
+
+void AFmHud::QueueNotificationBroadcast(const TFunction<void()>& Fn)
+{
+	NotificationBroadcastQueue.Add(Fn);
+	ProcessNotificationQueue();
 }
