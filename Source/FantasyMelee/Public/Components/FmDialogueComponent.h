@@ -38,7 +38,7 @@ struct FFmDialogueLine
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UDialogueWave> DialogueWave;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(TitleProperty="Montage"))
 	FFmMontageData MontageData;
 };
 
