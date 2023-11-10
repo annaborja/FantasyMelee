@@ -30,21 +30,6 @@ void UFmPlayerMovementComponent::BeginPlay()
 	Player->OnReachedJumpApex.AddDynamic(this, &ThisClass::OnJumpApexReached);
 }
 
-float UFmPlayerMovementComponent::GetMaxSpeed() const
-{
-	if (MovementMode == MOVE_Walking && !IsCrouching() && bWantsToSprint) return MaxSprintSpeed;
-	
-	if (MovementMode != MOVE_Custom) return Super::GetMaxSpeed();
-	
-	switch(CustomMovementMode)
-	{
-	case None:
-	default:
-		UE_LOG(LogTemp, Fatal, TEXT("Invalid movement mode %d"), CustomMovementMode)
-		return 0.f;
-	}
-}
-
 void UFmPlayerMovementComponent::UpdateCharacterStateBeforeMovement(const float DeltaSeconds)
 {
 	// If the player is trying to jump...
@@ -126,11 +111,6 @@ void UFmPlayerMovementComponent::ToggleCustomPressedJump(const bool bInCustomPre
 	bCustomPressedJump = bInCustomPressedJump;
 }
 
-void UFmPlayerMovementComponent::ToggleSprint(const bool bInWantsToSprint)
-{
-	bWantsToSprint = bInWantsToSprint;
-}
-
 void UFmPlayerMovementComponent::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
 {
 	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
@@ -172,7 +152,7 @@ void UFmPlayerMovementComponent::OnJumpApexReached()
 	GravityScale = JumpFallGravityScale;
 }
 
-bool UFmPlayerMovementComponent::IsCustomMovementModeActive(const EFmCustomMovementMode InCustomMovementMode) const
+bool UFmPlayerMovementComponent::IsCustomMovementModeActive(const EFmCustomMovementMode::Type InCustomMovementMode) const
 {
 	return MovementMode == MOVE_Custom && CustomMovementMode == InCustomMovementMode;
 }

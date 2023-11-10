@@ -3,6 +3,7 @@
 #include "Characters/NPCs/FmMajorNpcCharacter.h"
 
 #include "Characters/Player/FmPlayerController.h"
+#include "Components/FmCharacterMovementComponent.h"
 #include "Components/FmDialogueComponent.h"
 #include "Components/FmInventoryComponent.h"
 #include "Components/SphereComponent.h"
@@ -51,7 +52,7 @@ bool AFmMajorNpcCharacter::GrantTagSpec(AFantasyMeleeGameModeBase* GameMode, con
 	return false;
 }
 
-AFmMajorNpcCharacter::AFmMajorNpcCharacter()
+AFmMajorNpcCharacter::AFmMajorNpcCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	DialogueComponent = CreateDefaultSubobject<UFmDialogueComponent>(TEXT("DialogueComponent"));
 	
@@ -113,20 +114,6 @@ void AFmMajorNpcCharacter::Interact(AFmPlayerController* PlayerController, AFmHu
 FText AFmMajorNpcCharacter::GetInGameName() const
 {
 	return MajorNpcData.Name;
-}
-
-void AFmMajorNpcCharacter::ToggleSprint(const bool bSprint) const
-{
-	if (const auto CharacterMovement = GetCharacterMovement())
-	{
-		if (bSprint)
-		{
-			CharacterMovement->MaxWalkSpeed += 200.f;
-		} else
-		{
-			CharacterMovement->MaxWalkSpeed -= 200.f;
-		}
-	}
 }
 
 // TODO(P0): Figure out how actors can be affected by secondary effects if tags are only added to the game mode map.

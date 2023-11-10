@@ -11,6 +11,7 @@
 #include "Interfaces/FmTagSpecGrantable.h"
 #include "FmMajorNpcCharacter.generated.h"
 
+class UFmCharacterMovementComponent;
 class UDialogueVoice;
 class AFantasyMeleeGameModeBase;
 struct FFmDialogueOptionData;
@@ -39,7 +40,7 @@ class FANTASYMELEE_API AFmMajorNpcCharacter : public AFmNpcCharacter, public IGa
 public:
 	static bool GrantTagSpec(AFantasyMeleeGameModeBase* GameMode, const FGameplayTag& NpcTagId, const FFmTagSpec& TagSpec, const bool bDebug = false);
 	
-	AFmMajorNpcCharacter();
+	explicit AFmMajorNpcCharacter(const FObjectInitializer& ObjectInitializer);
 	
 	virtual void BeginPlay() override;
 
@@ -51,9 +52,6 @@ public:
 	virtual void Interact(AFmPlayerController* PlayerController, AFmHud* Hud) override;
 
 	virtual FText GetInGameName() const override;
-
-	UFUNCTION(BlueprintCallable)
-	void ToggleSprint(const bool bSprint) const;
 
 	UFUNCTION(BlueprintCallable)
 	virtual void GrantTagSpec(const FFmTagSpec& TagSpec) override;

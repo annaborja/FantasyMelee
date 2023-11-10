@@ -6,15 +6,19 @@
 #include "AI/FmAiController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/FmCharacterMovementComponent.h"
 #include "Components/FmCombatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GAS/FmAbilitySystemComponent.h"
 #include "GAS/Attributes/FmPrimaryAttributeSet.h"
 #include "GAS/Attributes/FmVitalAttributeSet.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Tags/TempTags.h"
 #include "Utils/Constants.h"
+#include "Utils/FmBlueprintFunctionLibrary.h"
 
-AFmNpcCharacter::AFmNpcCharacter()
+AFmNpcCharacter::AFmNpcCharacter(const FObjectInitializer& ObjectInitializer) :
+	Super(ObjectInitializer.SetDefaultSubobjectClass<UFmCharacterMovementComponent>(CharacterMovementComponentName))
 {
 	AIControllerClass = AFmAiController::StaticClass();
 	CombatComponent = CreateDefaultSubobject<UFmCombatComponent>(TEXT("CombatComponent"));
@@ -53,6 +57,8 @@ void AFmNpcCharacter::BeginPlay()
 	if (AbilitySystemComponent) {
 		AbilitySystemComponent->Init(this, this);
 	}
+	
+	CustomMovementComponent = CastChecked<UFmCharacterMovementComponent>(GetCharacterMovement());
 }
 
 void AFmNpcCharacter::PossessedBy(AController* NewController)
@@ -82,6 +88,21 @@ void AFmNpcCharacter::Attack() const
 	{
 		AbilitySystemComponent->TryActivateAbilityByTag(TAG_Action_Combat_Attack_Unarmed_Jab);
 	}
+}
+
+void AFmNpcCharacter::JumpToLocation(const FVector& TargetLocation, const float Duration)
+{
+	const auto Velocity = UFmBlueprintFunctionLibrary::CalculateVelocity(GetActorLocation(), TargetLocation, Duration);
+
+	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetLocation));
+	LaunchCharacter(Velocity, true, true);
+}
+
+void AFmNpcCharacter::ToggleSprint(const bool bSprint) const
+{
+	if (!CustomMovementComponent) return;
+
+	CustomMovementComponent->ToggleSprint(bSprint);
 }
 
 void AFmNpcCharacter::SetEmotionalState(const EFmNpcEmotionalState::Type InEmotionalState)

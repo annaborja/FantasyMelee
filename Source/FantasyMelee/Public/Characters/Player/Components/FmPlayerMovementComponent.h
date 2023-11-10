@@ -3,19 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "Components/FmCharacterMovementComponent.h"
 #include "FmPlayerMovementComponent.generated.h"
 
 class AFmPlayerCharacter;
 
-UENUM(BlueprintType)
-enum EFmCustomMovementMode : uint8
-{
-	None
-};
-
 UCLASS()
-class FANTASYMELEE_API UFmPlayerMovementComponent : public UCharacterMovementComponent
+class FANTASYMELEE_API UFmPlayerMovementComponent : public UFmCharacterMovementComponent
 {
 	GENERATED_BODY()
 
@@ -23,13 +17,11 @@ public:
 	UFmPlayerMovementComponent();
 
 	virtual void BeginPlay() override;
-	virtual float GetMaxSpeed() const override;
 	virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
 	virtual void UpdateCharacterStateAfterMovement(float DeltaSeconds) override;
 
 	void ToggleCrouch();
 	void ToggleCustomPressedJump(const bool bInCustomPressedJump);
-	void ToggleSprint(const bool bInWantsToSprint);
 	
 protected:
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
@@ -41,9 +33,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category="FM Debug")
 	bool bDebugMantle = false;
-	
-	UPROPERTY(EditAnywhere, Category="FM Params|Sprint")
-	float MaxSprintSpeed = 900.f;
 	
 	UPROPERTY(EditAnywhere, Category="FM Params|Jump")
 	float JumpCooldownTime = 0.1f;
@@ -71,8 +60,6 @@ private:
 	
 	UPROPERTY(VisibleInstanceOnly, Category="FM Runtime")
 	bool bCustomPressedJump = false;
-	UPROPERTY(VisibleInstanceOnly, Category="FM Runtime")
-	bool bWantsToSprint = false;
 	
 	UPROPERTY(Transient)
 	TObjectPtr<AFmPlayerCharacter> Player;
@@ -99,7 +86,7 @@ private:
 	UFUNCTION()
 	void OnJumpApexReached();
 	
-	bool IsCustomMovementModeActive(const EFmCustomMovementMode InCustomMovementMode) const;
+	bool IsCustomMovementModeActive(const EFmCustomMovementMode::Type InCustomMovementMode) const;
 
 	bool TryMantle();
 	FVector GetMantleStartLocation(const FHitResult& FrontHit, const FHitResult& SurfaceHit, const float CapsuleHalfHeight, const float CapsuleRadius, const bool bTallMantle) const;

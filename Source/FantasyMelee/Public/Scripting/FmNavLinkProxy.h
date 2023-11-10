@@ -23,6 +23,8 @@ protected:
 	
 private:
 	UPROPERTY(EditAnywhere, Category="FM Params")
+	float MovementDuration = 1.f;
+	UPROPERTY(EditAnywhere, Category="FM Params")
 	TEnumAsByte<EFmNavLinkProxyNavigationType> NavigationType = Jump;
 	
 	UFUNCTION()

@@ -175,14 +175,14 @@ void UFmBlueprintFunctionLibrary::ProcessEntityTagSpecGrants(const UObject* Worl
 
 FText UFmBlueprintFunctionLibrary::GetInGameNameifiedText(const UObject* WorldContextObject, const FText& InText)
 {
-	auto Result = InText.ToString();
+	auto Result = FString(InText.ToString());
 	
 	if (const auto GameMode = Cast<AFantasyMeleeGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject)))
 	{
 		if (const auto MajorNpcDataTable = GameMode->GetMajorNpcDataTable())
 		{
 			TArray<FFmMajorNpcData*> AllRows;
-			FRegexMatcher Matcher(FRegexPattern(TEXT("\\[(.+?)\\]")), InText.ToString());
+			FRegexMatcher Matcher(FRegexPattern(TEXT("\\[.+?\\]")), InText.ToString());
 			uint8 i = 0;
 	
 			while (Matcher.FindNext())
@@ -196,25 +196,30 @@ FText UFmBlueprintFunctionLibrary::GetInGameNameifiedText(const UObject* WorldCo
 				}
 		
 				auto CaptureGroup = Matcher.GetCaptureGroup(0);
-				// UKismetStringLibrary::ReplaceInline(CaptureGroup, "[", "");
-				// UKismetStringLibrary::ReplaceInline(CaptureGroup, "]", "");
+				UKismetStringLibrary::ReplaceInline(CaptureGroup, "[", "");
+				UKismetStringLibrary::ReplaceInline(CaptureGroup, "]", "");
 
 				if (const auto RowPtr = AllRows.FindByPredicate([&CaptureGroup](const FFmMajorNpcData* Data)
 				{
-					return Data->Tag.MatchesTagExact(FGameplayTag::RequestGameplayTag(FName(CaptureGroup)));
+					return Data->Tag.ToString() == CaptureGroup;
 				}); RowPtr != nullptr)
 				{
 					if (const auto Row = *RowPtr)
 					{
 						const auto Data = *Row;
-						SCREEN_LOG(UKismetStringLibrary::Replace(Result, "[" + CaptureGroup + "]", Data.Name.ToString()), 4.f);
+						UKismetStringLibrary::ReplaceInline(Result, "[" + CaptureGroup + "]", Data.Name.ToString());
 					}
 				}
-
-				SCREEN_LOG(CaptureGroup, 4.f)
 			}
 		}
 	}
 	
 	return FText::FromString(Result);
+}
+
+FVector UFmBlueprintFunctionLibrary::CalculateVelocity(const FVector& From, const FVector& To, const float Duration)
+{
+	return FVector(((To.X - From.X) / Duration),
+	((To.Y - From.Y) / Duration),
+	((To.Z - (From.Z + (FMath::Pow(Duration, 2) * -0.5f * 982.f))) / Duration));
 }

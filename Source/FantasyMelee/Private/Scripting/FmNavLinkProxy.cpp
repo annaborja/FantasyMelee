@@ -2,6 +2,7 @@
 
 #include "Scripting/FmNavLinkProxy.h"
 
+#include "Characters/NPCs/FmNpcCharacter.h"
 #include "Utils/Macros.h"
 
 void AFmNavLinkProxy::BeginPlay()
@@ -13,15 +14,18 @@ void AFmNavLinkProxy::BeginPlay()
 
 void AFmNavLinkProxy::HandleSmartLinkReached(AActor* MovingActor, const FVector& DestinationPoint)
 {
-	switch (NavigationType)
+	if (const auto Npc = Cast<AFmNpcCharacter>(MovingActor))
 	{
-	case Jump:
-		SCREEN_LOG("Jump", 4.f)
-		break;
-	case Mantle:
-		SCREEN_LOG("Mantle", 4.f)
-		break;
-	default:
-		break;
+		switch (NavigationType)
+		{
+		case Jump:
+			Npc->JumpToLocation(DestinationPoint, MovementDuration);
+			break;
+		case Mantle:
+			SCREEN_LOG("Mantle", 4.f)
+			break;
+		default:
+			break;
+		}
 	}
 }

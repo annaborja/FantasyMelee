@@ -8,6 +8,7 @@
 #include "GAS/FmAbilitySystemComponent.h"
 #include "FmNpcCharacter.generated.h"
 
+class UFmCharacterMovementComponent;
 class AFmAiController;
 class UBehaviorTree;
 class UFmVitalAttributeSet;
@@ -30,7 +31,7 @@ class FANTASYMELEE_API AFmNpcCharacter : public AFmCharacter, public IAbilitySys
 	GENERATED_BODY()
 
 public:
-	AFmNpcCharacter();
+	explicit AFmNpcCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 	virtual void PossessedBy(AController* NewController) override;
@@ -38,6 +39,11 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override { return AbilitySystemComponent; }
 
 	void Attack() const;
+	
+	UFUNCTION(BlueprintCallable)
+	void JumpToLocation(const FVector& TargetLocation, const float Duration);
+	UFUNCTION(BlueprintCallable)
+	void ToggleSprint(const bool bSprint) const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetEmotionalState(const EFmNpcEmotionalState::Type InEmotionalState);
@@ -67,4 +73,7 @@ protected:
 	float FindTargetSphereRadius = 1000.f;
 	UPROPERTY(EditDefaultsOnly, Category="AI|Find Target")
 	bool bDebugFindTargetSphere;
+	
+	UPROPERTY(Transient)
+	TObjectPtr<UFmCharacterMovementComponent> CustomMovementComponent;
 };
