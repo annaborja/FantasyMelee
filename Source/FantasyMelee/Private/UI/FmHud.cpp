@@ -132,12 +132,9 @@ void AFmHud::BroadcastTargetInteractable(const AActor* TargetInteractable) const
 	TargetInteractableDelegate.Broadcast(TargetInteractable);
 }
 
-void AFmHud::BroadcastTutorial(const FFmTutorialData& Tutorial)
+void AFmHud::BroadcastTutorial(const FFmTutorialData& Tutorial) const
 {
 	TutorialDelegate.Broadcast(Tutorial);
-	// QueueNotificationBroadcast([this, Tutorial]
-	// {
-	// });
 }
 
 void AFmHud::OpenMainMenu() const

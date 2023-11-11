@@ -16,6 +16,7 @@
 #include "Tags/TempTags.h"
 #include "Utils/Constants.h"
 #include "Utils/FmBlueprintFunctionLibrary.h"
+#include "Utils/Macros.h"
 
 AFmNpcCharacter::AFmNpcCharacter(const FObjectInitializer& ObjectInitializer) :
 	Super(ObjectInitializer.SetDefaultSubobjectClass<UFmCharacterMovementComponent>(CharacterMovementComponentName))
@@ -92,10 +93,21 @@ void AFmNpcCharacter::Attack() const
 
 void AFmNpcCharacter::JumpToLocation(const FVector& TargetLocation, const float Duration)
 {
-	const auto Velocity = UFmBlueprintFunctionLibrary::CalculateVelocity(GetActorLocation(), TargetLocation, Duration);
+	if (CustomMovementComponent)
+	{
+		const auto Velocity = UFmBlueprintFunctionLibrary::CalculateVelocity(GetActorLocation(), TargetLocation, Duration, CustomMovementComponent->GravityScale);
+		SCREEN_LOG(Velocity.ToString(), 4.f)
 
-	SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetLocation));
-	LaunchCharacter(Velocity, true, true);
+		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetLocation));
+		LaunchCharacter(Velocity, true, true);
+	}
+}
+
+void AFmNpcCharacter::Mantle()
+{
+	if (!CustomMovementComponent) return;
+	
+	CustomMovementComponent->TryMantle();
 }
 
 void AFmNpcCharacter::ToggleSprint(const bool bSprint) const
@@ -108,4 +120,16 @@ void AFmNpcCharacter::ToggleSprint(const bool bSprint) const
 void AFmNpcCharacter::SetEmotionalState(const EFmNpcEmotionalState::Type InEmotionalState)
 {
 	EmotionalState = InEmotionalState;
+}
+
+void AFmNpcCharacter::SetTargetMoveLocation(const FVector& Location)
+{
+	TargetMoveLocation = Location;
+	bHasTargetMoveLocation = true;
+}
+
+void AFmNpcCharacter::UnsetTargetMoveLocation()
+{
+	TargetMoveLocation = FVector();
+	bHasTargetMoveLocation = false;
 }

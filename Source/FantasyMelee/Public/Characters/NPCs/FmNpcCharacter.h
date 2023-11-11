@@ -43,10 +43,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void JumpToLocation(const FVector& TargetLocation, const float Duration);
 	UFUNCTION(BlueprintCallable)
+	void Mantle();
+	UFUNCTION(BlueprintCallable)
 	void ToggleSprint(const bool bSprint) const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetEmotionalState(const EFmNpcEmotionalState::Type InEmotionalState);
+
+	void SetTargetMoveLocation(const FVector& Location);
+	void UnsetTargetMoveLocation();
+	FVector GetTargetMoveLocation() const { return TargetMoveLocation; }
+	bool HasTargetMoveLocation() const { return bHasTargetMoveLocation; }
 
 	FORCEINLINE EFmNpcEmotionalState::Type GetEmotionalState() const { return EmotionalState; }
 	FORCEINLINE float GetFindTargetSphereRadius() const { return FindTargetSphereRadius; }
@@ -73,6 +80,9 @@ protected:
 	float FindTargetSphereRadius = 1000.f;
 	UPROPERTY(EditDefaultsOnly, Category="AI|Find Target")
 	bool bDebugFindTargetSphere;
+
+	FVector TargetMoveLocation;
+	bool bHasTargetMoveLocation = false;
 	
 	UPROPERTY(Transient)
 	TObjectPtr<UFmCharacterMovementComponent> CustomMovementComponent;

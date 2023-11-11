@@ -49,7 +49,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static FText GetInGameNameifiedText(const UObject* WorldContextObject, const FText& InText);
 	
-	static FVector CalculateVelocity(const FVector& From, const FVector& To, const float Duration);
+	static FVector CalculateVelocity(const FVector& From, const FVector& To, const float Duration, const float GravityScale = 1.f);
 };
 
 template <typename T>

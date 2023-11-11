@@ -217,9 +217,9 @@ FText UFmBlueprintFunctionLibrary::GetInGameNameifiedText(const UObject* WorldCo
 	return FText::FromString(Result);
 }
 
-FVector UFmBlueprintFunctionLibrary::CalculateVelocity(const FVector& From, const FVector& To, const float Duration)
+FVector UFmBlueprintFunctionLibrary::CalculateVelocity(const FVector& From, const FVector& To, const float Duration, const float GravityScale)
 {
 	return FVector(((To.X - From.X) / Duration),
 	((To.Y - From.Y) / Duration),
-	((To.Z - (From.Z + (FMath::Pow(Duration, 2) * -0.5f * 982.f))) / Duration));
+	((To.Z - (From.Z + (FMath::Pow(Duration, 2) * -0.5f * 982.f * GravityScale))) / Duration));
 }

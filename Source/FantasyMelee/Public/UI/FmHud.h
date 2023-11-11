@@ -80,7 +80,7 @@ public:
 	void BroadcastQuest(const FFmQuestData& Quest, const EFmQuestBroadcastType QuestBroadcastType);
 	void BroadcastQuestStep(const FFmQuestStepData& QuestStep);
 	void BroadcastTargetInteractable(const AActor* TargetInteractable) const;
-	void BroadcastTutorial(const FFmTutorialData& Tutorial);
+	void BroadcastTutorial(const FFmTutorialData& Tutorial) const;
 	
 	void OpenMainMenu() const;
 	
