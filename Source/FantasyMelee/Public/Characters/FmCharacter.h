@@ -31,6 +31,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ToggleInjured(const bool bInIsInjured);
 
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE bool IsInjured() const { return bIsInjured; }
 
 protected:

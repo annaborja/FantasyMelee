@@ -30,6 +30,9 @@ protected:
 	void SetUpSpawnedActor(AActor* SpawnedActor);
 
 	virtual void BeginPlay() override;
+	
+	UFUNCTION(BlueprintNativeEvent)
+	void OnSpawnedActorDestroyed(AActor* DestroyedActor);
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -69,9 +72,6 @@ private:
 	uint8 SpawnedActorCount = 0;
 	UPROPERTY(VisibleInstanceOnly, Category="FM Runtime")
 	float TargetDeltaSeconds = TargetDeltaSecondsMin;
-
-	UFUNCTION()
-	void DecrementSpawnedActorCount(AActor* DestroyedActor);
 
 	void SpawnActor();
 };

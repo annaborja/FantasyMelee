@@ -66,7 +66,7 @@ void AFmActorSpawner::BeginPlay()
 	}
 }
 
-void AFmActorSpawner::DecrementSpawnedActorCount(AActor* DestroyedActor)
+void AFmActorSpawner::OnSpawnedActorDestroyed_Implementation(AActor* DestroyedActor)
 {
 	SpawnedActorCount--;
 }
@@ -86,7 +86,7 @@ void AFmActorSpawner::SpawnActor()
 
 		UGameplayStatics::FinishSpawningActor(SpawnedActor, SpawnTransform);
 		
-		SpawnedActor->OnDestroyed.AddDynamic(this, &ThisClass::DecrementSpawnedActorCount);
+		SpawnedActor->OnDestroyed.AddDynamic(this, &ThisClass::OnSpawnedActorDestroyed);
 		SpawnedActorCount++;
 	}
 }
