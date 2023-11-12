@@ -116,6 +116,9 @@ bool UFmCharacterMovementComponent::TryMantle()
 		const auto CapsuleHalfHeight = UKismetMathLibrary::Conv_FloatToDouble(Capsule->GetScaledCapsuleHalfHeight());
 		const auto CapsuleRadius = UKismetMathLibrary::Conv_FloatToDouble(Capsule->GetScaledCapsuleRadius());
 		
+		const float MinMantleHeight = MaxStepHeight - 1.f;
+		// const float MinMantleHeight = CapsuleHalfHeight + 20.f;
+		
 		const auto CapsuleBaseLocation = UpdatedComponent->GetComponentLocation() + FVector::DownVector * CapsuleHalfHeight;
 		const auto ForwardNormal2d = UpdatedComponent->GetForwardVector().GetSafeNormal2D();
 		const auto MaxMantleHeight = CapsuleHalfHeight * 2.0 + MantleReachHeight;
@@ -126,7 +129,7 @@ bool UFmCharacterMovementComponent::TryMantle()
 		
 		FHitResult FrontHit;
 		// Enable mantling starting from the height at which the character can't just step up onto something.
-		auto FrontTraceStart = CapsuleBaseLocation + FVector::UpVector * UKismetMathLibrary::Conv_FloatToDouble(MaxStepHeight - 1.f);
+		auto FrontTraceStart = CapsuleBaseLocation + FVector::UpVector * UKismetMathLibrary::Conv_FloatToDouble(MinMantleHeight);
 
 		for (int i = 0; i < NumMantleFrontTraceDivisions + 1; i++)
 		{
@@ -137,7 +140,7 @@ bool UFmCharacterMovementComponent::TryMantle()
 				break;
 			}
 		
-			FrontTraceStart += FVector::UpVector * ((MaxMantleHeight - (MaxStepHeight - 1.0)) / NumMantleFrontTraceDivisions);
+			FrontTraceStart += FVector::UpVector * ((MaxMantleHeight - (MinMantleHeight)) / NumMantleFrontTraceDivisions);
 		}
 
 		// No valid front surface to mantle.
@@ -202,12 +205,18 @@ bool UFmCharacterMovementComponent::TryMantle()
 		CollisionQueryParams.AddIgnoredActor(Character);
 		if (GetWorld()->OverlapAnyTestByProfile(ClearCapLoc, FQuat::Identity, "BlockAll", CapShape, CollisionQueryParams))
 		{
-			UKismetSystemLibrary::DrawDebugCapsule(this, ClearCapLoc, CapsuleHalfHeight, CapsuleRadius, Character->GetActorRotation(), FColor::Red, 5.f);
+			if (bDebugMantle)
+			{
+				UKismetSystemLibrary::DrawDebugCapsule(this, ClearCapLoc, CapsuleHalfHeight, CapsuleRadius, Character->GetActorRotation(), FColor::Red, 5.f);
+			}
 			return false;
 		}
 		else
 		{
-			UKismetSystemLibrary::DrawDebugCapsule(this, ClearCapLoc, CapsuleHalfHeight, CapsuleRadius, Character->GetActorRotation(), FColor::Green, 5.f);
+			if (bDebugMantle)
+			{
+				UKismetSystemLibrary::DrawDebugCapsule(this, ClearCapLoc, CapsuleHalfHeight, CapsuleRadius, Character->GetActorRotation(), FColor::Green, 5.f);
+			}
 		}
 
 		FVector ShortMantleTarget = GetMantleStartLocation(FrontHit, SurfaceHit, CapsuleHalfHeight, CapsuleRadius, false);
@@ -225,7 +234,11 @@ bool UFmCharacterMovementComponent::TryMantle()
 		}
 
 		FVector TransitionTarget = bTallMantle ? TallMantleTarget : ShortMantleTarget;
-		UKismetSystemLibrary::DrawDebugCapsule(this, TransitionTarget, CapsuleHalfHeight, CapsuleRadius, Character->GetActorRotation(), FColor::Yellow, 5.f);
+		
+		if (bDebugMantle)
+		{
+			UKismetSystemLibrary::DrawDebugCapsule(this, TransitionTarget, CapsuleHalfHeight, CapsuleRadius, Character->GetActorRotation(), FColor::Yellow, 5.f);
+		}
 
 		float UpSpeed = Velocity | FVector::UpVector;
 		float TransDistance = FVector::Dist(TransitionTarget, UpdatedComponent->GetComponentLocation());
@@ -267,9 +280,12 @@ bool UFmCharacterMovementComponent::TryMantle()
 
 FVector UFmCharacterMovementComponent::GetMantleStartLocation(const FHitResult& FrontHit, const FHitResult& SurfaceHit, const float CapsuleHalfHeight, const float CapsuleRadius, const bool bTallMantle) const
 {
+	// const float MinMantleHeight = MaxStepHeight - 1.f;
+	const float MinMantleHeight = CapsuleHalfHeight + 20.f;
 	float CosWallSteepnessAngle = FrontHit.Normal | FVector::UpVector;
-	float DownDistance = bTallMantle ? CapsuleHalfHeight * 2.f : MaxStepHeight - 1;
-	FVector EdgeTangent = FVector::CrossProduct(SurfaceHit.Normal, FrontHit.Normal).GetSafeNormal();
+	// float DownDistance = bTallMantle ? CapsuleHalfHeight * 2.f : MaxStepHeight - 1;
+	float DownDistance = bTallMantle ? CapsuleHalfHeight * 2.f : MinMantleHeight;
+	const FVector EdgeTangent = FVector::CrossProduct(SurfaceHit.Normal, FrontHit.Normal).GetSafeNormal();
 
 	FVector MantleStart = SurfaceHit.Location;
 	MantleStart += FrontHit.Normal.GetSafeNormal2D() * (2.f + CapsuleRadius);

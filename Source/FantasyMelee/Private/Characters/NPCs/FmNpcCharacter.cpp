@@ -96,7 +96,6 @@ void AFmNpcCharacter::JumpToLocation(const FVector& TargetLocation, const float 
 	if (CustomMovementComponent)
 	{
 		const auto Velocity = UFmBlueprintFunctionLibrary::CalculateVelocity(GetActorLocation(), TargetLocation, Duration, CustomMovementComponent->GravityScale);
-		SCREEN_LOG(Velocity.ToString(), 4.f)
 
 		SetActorRotation(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetLocation));
 		LaunchCharacter(Velocity, true, true);

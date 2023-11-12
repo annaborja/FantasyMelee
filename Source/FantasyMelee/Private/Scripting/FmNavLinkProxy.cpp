@@ -4,7 +4,6 @@
 
 #include "Characters/NPCs/FmNpcCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Utils/Macros.h"
 
 void AFmNavLinkProxy::BeginPlay()
 {
@@ -20,7 +19,6 @@ void AFmNavLinkProxy::HandleSmartLinkReached(AActor* MovingActor, const FVector&
 		switch (NavigationType)
 		{
 		case Jump:
-			SCREEN_LOG(TEXT("Jump"), 4.f)
 			Npc->JumpToLocation(DestinationPoint, MovementDuration);
 			break;
 		case Mantle:
