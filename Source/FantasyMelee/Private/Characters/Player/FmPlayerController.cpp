@@ -125,7 +125,7 @@ void AFmPlayerController::Interact(const FInputActionValue& InputActionValue)
 		{
 			if (const auto TargetInteractable = Cast<IFmInteractable>(PlayerInteractionComponent->GetTargetInteractable()))
 			{
-				TargetInteractable->Interact(this, CustomHud);
+				const_cast<IFmInteractable*>(TargetInteractable)->Interact(this, CustomHud);
 			}
 		}
 	}

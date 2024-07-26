@@ -8,7 +8,7 @@ public class FantasyMeleeTarget : TargetRules
 	public FantasyMeleeTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-		DefaultBuildSettings = BuildSettingsVersion.V2;
+		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 		ExtraModuleNames.Add("FantasyMelee");
 	}
